@@ -1,0 +1,64 @@
+name: Build CloudStream MAIN (Blue Icon)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: 34
+        build-tools: 34.0.0
+        ndk-version: '25.1.8937393'
+        cmake-version: '3.22.1'
+        
+    - name: Accept licenses
+      run: |
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+        
+    - name: Grant gradlew permission
+      run: chmod +x gradlew
+      
+    - name: Build CloudStream MAIN (Release)
+      run: |
+        echo "Building CloudStream RELEASE version (blue icon)..."
+        
+        # BUILD RELEASE VERSION
+        ./gradlew :app:assembleRelease --no-daemon --stacktrace
+        
+        echo "Build completed!"
+        
+    - name: Find RELEASE APK
+      run: |
+        echo "=== SEARCHING FOR RELEASE APK ==="
+        
+        # Cerca APK di release
+        find . -path "*/release/*" -name "*.apk" -type f 2>/dev/null | while read file; do
+          echo "📦 Found RELEASE APK: $file"
+          ls -lh "$file"
+        done
+        
+    - name: Upload RELEASE APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: CloudStream-MAIN-APK
+        path: |
+          app/build/outputs/apk/release/*.apk
+          app/build/outputs/apk/release/
+        if-no-files-found: error
+        retention-days: 30
