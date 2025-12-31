@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <!-- TITOLO MIGLIORATO -->
+    <!-- TITOLO -->
     <TextView
         android:id="@+id/text1"
         android:layout_width="match_parent"
@@ -29,25 +29,21 @@
         android:textColor="?attr/textColor"
         android:textSize="14sp" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/repo_name_container"
+    <EditText
+        android:id="@+id/repo_name_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
+        android:autofillHints="username"
+        android:background="?attr/boxItemBackground"
         android:hint="@string/repository_name_hint"
-        app:boxBackgroundMode="outline"
-        app:boxBackgroundColor="?attr/boxItemBackground">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/repo_name_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints="username"
-            android:inputType="text"
-            android:nextFocusDown="@id/repo_url_input"
-            android:textColor="?attr/textColor"
-            android:textSize="14sp" />
-    </com.google.android.material.textfield.TextInputLayout>
+        android:inputType="text"
+        android:nextFocusDown="@id/repo_url_input"
+        android:padding="16dp"
+        android:textColor="?attr/textColor"
+        android:textColorHint="?attr/grayTextColor"
+        android:textSize="14sp"
+        tools:ignore="LabelFor" />
 
     <!-- URL REPOSITORY -->
     <TextView
@@ -58,27 +54,23 @@
         android:textColor="?attr/textColor"
         android:textSize="14sp" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/repo_url_container"
+    <EditText
+        android:id="@+id/repo_url_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
+        android:autofillHints="url"
+        android:background="?attr/boxItemBackground"
         android:hint="@string/repository_url_hint"
-        app:boxBackgroundMode="outline"
-        app:boxBackgroundColor="?attr/boxItemBackground">
+        android:inputType="textUri"
+        android:nextFocusUp="@id/repo_name_input"
+        android:padding="16dp"
+        android:textColor="?attr/textColor"
+        android:textColorHint="?attr/grayTextColor"
+        android:textSize="14sp"
+        tools:ignore="LabelFor" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/repo_url_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints="url"
-            android:inputType="textUri"
-            android:nextFocusUp="@id/repo_name_input"
-            android:textColor="?attr/textColor"
-            android:textSize="14sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- BOTTONI MIGLIORATI -->
+    <!-- BOTTONI -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -92,9 +84,7 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginEnd="12dp"
-            android:minWidth="100dp"
             android:text="@string/sort_cancel"
-            android:textAllCaps="false"
             app:backgroundTint="?attr/boxItemBackground"
             app:strokeColor="?attr/colorPrimary"
             app:strokeWidth="1dp" />
@@ -104,9 +94,7 @@
             style="@style/WhiteButton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:minWidth="120dp"
             android:text="@string/add_repository"
-            android:textAllCaps="false"
             android:textStyle="bold"
             app:backgroundTint="?attr/colorPrimary" />
     </LinearLayout>
