@@ -4,31 +4,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:backgroundTint="?attr/primaryGrayBackground"
+    android:background="?attr/primaryBlackBackground"
     android:clipToPadding="false"
     android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".ui.settings.extensions.PluginDetailsFragment">
 
+    <!-- INTESTAZIONE -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="20dp"
-        android:visibility="visible">
+        android:paddingBottom="16dp">
 
-
+        <!-- ICONA -->
         <androidx.cardview.widget.CardView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:cardCornerRadius="25dp">
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            app:cardCornerRadius="28dp"
+            app:cardBackgroundColor="?attr/colorPrimary">
 
             <ImageView
                 android:id="@+id/plugin_icon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:ignore="ContentDescription" />
+                android:padding="14dp"
+                android:scaleType="centerInside"
+                app:tint="@android:color/white"
+                tools:ignore="ContentDescription"
+                tools:src="@drawable/ic_baseline_extension_24" />
         </androidx.cardview.widget.CardView>
 
+        <!-- NOME -->
         <TextView
             android:id="@+id/plugin_name"
             android:layout_width="0dp"
@@ -36,289 +43,252 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:textColor="?attr/textColor"
             android:textSize="20sp"
-            android:textStyle="normal"
-            tools:text="Hello world" />
+            android:textStyle="bold"
+            tools:text="Plugin Name" />
 
-        <ImageView
-            android:id="@+id/action_settings"
+        <!-- BOTTONI -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/title_settings"
-            android:visibility="gone"
-            android:focusable="true"
-            app:srcCompat="@drawable/ic_baseline_tune_24"
-            tools:visibility="visible" />
+            android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/github_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginStart="16dp"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_github_logo" />
+            <ImageView
+                android:id="@+id/action_settings"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/title_settings"
+                android:focusable="true"
+                android:padding="10dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_baseline_tune_24"
+                app:tint="?attr/iconColor"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/github_btn"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:focusable="true"
+                android:padding="10dp"
+                app:srcCompat="@drawable/ic_github_logo"
+                app:tint="?attr/iconColor" />
+        </LinearLayout>
     </LinearLayout>
 
+    <!-- DESCRIZIONE (SEPARATA) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/boxItemBackground"
+        android:padding="16dp"
+        android:layout_marginBottom="12dp"
+        android:elevation="2dp">
 
-        <LinearLayout
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/extension_description"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/plugin_description"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            android:padding="8dp">
+            android:layout_height="wrap_content"
+            android:textColor="?attr/textColor"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2sp"
+            tools:text="This is a plugin description that explains what this extension does in detail." />
+    </LinearLayout>
 
-            <!--marquee_forever-->
-            <com.google.android.material.button.MaterialButton
-                style="@style/SmallBlackButton"
-                android:layout_gravity="center"
-                android:layout_marginStart="10dp"
-                android:focusable="false"
-                android:text="@string/extension_description" />
+    <!-- INFO PRINCIPALI (IN 2 COLONNE) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
 
+        <!-- COLONNA SINISTRA -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="?attr/boxItemBackground"
+            android:padding="16dp"
+            android:elevation="2dp"
+            android:layout_marginEnd="6dp">
+
+            <!-- AUTORE -->
             <TextView
-                android:id="@+id/plugin_description"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-
-                android:ellipsize="none"
-
-                android:gravity="center_vertical"
-                android:singleLine="false"
-                android:textColor="?attr/textColor"
-                tools:text="Lolem ipsum kek Lolem ipsum kek Lolem ipsum kek Lolem ipsum kek " />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            android:padding="8dp">
-
-            <!--marquee_forever-->
-            <com.google.android.material.button.MaterialButton
-                style="@style/SmallBlackButton"
-                android:layout_gravity="center"
-                android:layout_marginStart="10dp"
-                android:focusable="false"
-                android:text="@string/extension_authors" />
+                android:text="@string/extension_authors"
+                android:textColor="?attr/grayTextColor"
+                android:textSize="12sp"
+                android:paddingBottom="4dp" />
 
             <TextView
                 android:id="@+id/plugin_author"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:ellipsize="marquee"
-
-                android:gravity="center_vertical"
-
-                android:singleLine="false"
-
                 android:textColor="?attr/textColor"
-                tools:text="Lolem ipsum kek" />
-        </LinearLayout>
+                android:textSize="14sp"
+                android:paddingBottom="12dp"
+                tools:text="Author Name" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            android:padding="8dp">
-
-            <!--marquee_forever-->
-            <com.google.android.material.button.MaterialButton
-                style="@style/SmallBlackButton"
-                android:layout_gravity="center"
-                android:layout_marginStart="10dp"
-                android:focusable="false"
-                android:text="@string/extension_version" />
-
+            <!-- STATO -->
             <TextView
-                android:id="@+id/plugin_version"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:ellipsize="marquee"
-
-                android:gravity="center_vertical"
-
-                android:singleLine="true"
-
-                android:textColor="?attr/textColor"
-                tools:text="Lolem ipsum kek" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            android:padding="8dp">
-
-            <!--marquee_forever-->
-            <com.google.android.material.button.MaterialButton
-                style="@style/SmallBlackButton"
-                android:layout_gravity="center"
-                android:layout_marginStart="10dp"
-                android:focusable="false"
-                android:text="@string/extension_status" />
+                android:text="@string/extension_status"
+                android:textColor="?attr/grayTextColor"
+                android:textSize="12sp"
+                android:paddingBottom="4dp" />
 
             <TextView
                 android:id="@+id/plugin_status"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:ellipsize="marquee"
-
-                android:gravity="center_vertical"
-
-                android:singleLine="true"
-
-                android:textColor="?attr/textColor"
-                tools:text="Lolem ipsum kek" />
+                android:textColor="?attr/colorPrimary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="Installed" />
         </LinearLayout>
 
+        <!-- COLONNA DESTRA -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            android:padding="8dp">
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="?attr/boxItemBackground"
+            android:padding="16dp"
+            android:elevation="2dp"
+            android:layout_marginStart="6dp">
 
-            <!--marquee_forever-->
-            <com.google.android.material.button.MaterialButton
-                style="@style/SmallBlackButton"
-                android:layout_gravity="center"
-                android:layout_marginStart="10dp"
-                android:focusable="false"
-                android:text="@string/extension_size" />
+            <!-- VERSIONE -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/extension_version"
+                android:textColor="?attr/grayTextColor"
+                android:textSize="12sp"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:id="@+id/plugin_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/textColor"
+                android:textSize="14sp"
+                android:paddingBottom="12dp"
+                tools:text="v1.2.3" />
+
+            <!-- DIMENSIONE -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/extension_size"
+                android:textColor="?attr/grayTextColor"
+                android:textSize="12sp"
+                android:paddingBottom="4dp" />
 
             <TextView
                 android:id="@+id/plugin_size"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:ellipsize="marquee"
-
-                android:gravity="center_vertical"
-
-                android:singleLine="true"
-
                 android:textColor="?attr/textColor"
-                tools:text="Lolem ipsum kek" />
+                android:textSize="14sp"
+                tools:text="2.4 MB" />
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            android:padding="8dp">
-
-            <!--marquee_forever-->
-
-            <com.google.android.material.button.MaterialButton
-                style="@style/SmallBlackButton"
-                android:layout_gravity="center"
-                android:layout_marginStart="10dp"
-                android:focusable="false"
-                android:text="@string/extension_types" />
-
-            <TextView
-                android:id="@+id/plugin_types"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:ellipsize="marquee"
-
-                android:gravity="center_vertical"
-
-                android:singleLine="false"
-
-                android:textColor="?attr/textColor"
-                tools:text="Lolem ipsum kek" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:foreground="?android:attr/selectableItemBackgroundBorderless"
-            android:padding="8dp">
-
-            <!--marquee_forever-->
-
-            <com.google.android.material.button.MaterialButton
-                style="@style/SmallBlackButton"
-                android:layout_gravity="center"
-                android:layout_marginStart="10dp"
-                android:focusable="false"
-                android:text="@string/extension_language" />
-
-            <TextView
-                android:id="@+id/plugin_lang"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:ellipsize="marquee"
-
-                android:gravity="center_vertical"
-
-                android:singleLine="false"
-
-                android:textColor="?attr/textColor"
-                tools:text="Lolem ipsum kek" />
-        </LinearLayout>
-
     </LinearLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- TIPI E LINGUA -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal|center_vertical">
+        android:orientation="vertical"
+        android:background="?attr/boxItemBackground"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"
+        android:elevation="2dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/extension_types"
+            android:textColor="?attr/grayTextColor"
+            android:textSize="12sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/plugin_types"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/textColor"
+            android:textSize="14sp"
+            android:paddingBottom="12sp"
+            tools:text="Movies, TV Series, Anime" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/extension_language"
+            android:textColor="?attr/grayTextColor"
+            android:textSize="12sp"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/plugin_lang"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/textColor"
+            android:textSize="14sp"
+            tools:text="English, Spanish, French" />
+    </LinearLayout>
+
+    <!-- VOTI -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
 
         <TextView
             android:id="@+id/plugin_votes"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="32dp"
-            android:gravity="center_horizontal|center_vertical"
             android:text="0"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/upvote"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textColor="?attr/textColor"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingEnd="12dp" />
 
         <ImageView
             android:id="@+id/upvote"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="32dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_baseline_thumb_up_24"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="?attr/colorPrimary"
+            android:backgroundTint="?attr/colorPrimary"
+            android:contentDescription="Upvote"
             android:focusable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/plugin_votes"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:padding="14dp"
+            app:srcCompat="@drawable/ic_baseline_thumb_up_24"
+            app:tint="@android:color/white" />
+    </LinearLayout>
 
 </LinearLayout>
