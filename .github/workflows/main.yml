@@ -1,8 +1,8 @@
-name: Build CloudStream APK
+name: Build Real CloudStream APK
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -19,81 +19,85 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
         
-    - name: Setup Android environment
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget unzip
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        mkdir -p android-sdk
-        unzip -q commandlinetools-linux-9477386_latest.zip -d android-sdk
-        mv android-sdk/cmdline-tools android-sdk/latest
-        mkdir -p android-sdk/cmdline-tools
-        mv android-sdk/latest android-sdk/cmdline-tools/
-        export ANDROID_SDK_ROOT=$PWD/android-sdk
-        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-        echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: 34
+        build-tools: 34.0.0
+        ndk-version: '25.1.8937393'
+        cmake-version: '3.22.1'
         
-    - name: Debug - Show project structure
+    - name: Accept licenses
       run: |
-        echo "=== PROJECT STRUCTURE ==="
-        pwd
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+        
+    - name: Grant gradlew permission
+      run: chmod +x gradlew
+      
+    - name: Debug project structure
+      run: |
+        echo "=== CLOUDSTREAM STRUCTURE ==="
         ls -la
         echo ""
-        echo "=== GRADLE FILES ==="
-        find . -name "*.gradle*" -type f | head -10
-        echo ""
-        echo "=== ANDROID MANIFEST ==="
-        find . -name "AndroidManifest.xml" -type f | head -5
+        echo "=== MODULES ==="
+        find . -name "build.gradle*" -type f | head -10
         
-    - name: Try to build
+    - name: Build CloudStream APK
       run: |
-        echo "=== ATTEMPTING BUILD ==="
-        if [ -f "gradlew" ]; then
-          chmod +x gradlew
-          echo "Using ./gradlew..."
-          ./gradlew tasks 2>&1 | grep -i assemble || echo "No assemble tasks found"
-          ./gradlew assembleDebug 2>&1 | tail -20 || echo "Debug build failed"
-          ./gradlew assembleRelease 2>&1 | tail -20 || echo "Release build failed"
+        echo "Building CloudStream..."
+        
+        # CloudStream usa Kotlin Multiplatform, build speciale
+        ./gradlew :app:assembleDebug --no-daemon --stacktrace
+        
+        echo "Build completed!"
+        
+    - name: Find generated APK
+      run: |
+        echo "=== SEARCHING FOR REAL APK ==="
+        
+        # Cerca APK vere (file binari, non testo)
+        find . -name "*.apk" -type f -size +1M 2>/dev/null | while read file; do
+          echo "📦 Found REAL APK: $file"
+          ls -lh "$file"
+          echo "File type:"
+          file "$file"
+          echo ""
+        done
+        
+        if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+          echo "✅ MAIN APK FOUND: app/build/outputs/apk/debug/app-debug.apk"
         else
-          echo "No gradlew found. Creating one..."
-          echo '#!/bin/sh' > gradlew
-          echo 'echo "Gradle wrapper placeholder"' >> gradlew
-          chmod +x gradlew
+          echo "⚠️ Standard APK not found, checking alternatives..."
+          # CloudStream potrebbe metterle altrove
+          find . -path "*/outputs/*" -name "*.apk" 2>/dev/null
         fi
         
-    - name: Create APK files (always)
-      run: |
-        echo "=== CREATING APK FILES ==="
-        mkdir -p app/build/outputs/apk/debug
-        mkdir -p app/build/outputs/apk/release
-        
-        # APK debug - usando echo multipli invece di heredoc
-        echo "CLOUDSTREAM MODIFIED APK - DEBUG" > app/build/outputs/apk/debug/cloudstream-mod.apk
-        echo "" >> app/build/outputs/apk/debug/cloudstream-mod.apk
-        echo "Build attempted on: $(date)" >> app/build/outputs/apk/debug/cloudstream-mod.apk
-        echo "" >> app/build/outputs/apk/debug/cloudstream-mod.apk
-        echo "STATUS: Build script executed." >> app/build/outputs/apk/debug/cloudstream-mod.apk
-        echo "Check workflow logs for details." >> app/build/outputs/apk/debug/cloudstream-mod.apk
-        echo "" >> app/build/outputs/apk/debug/cloudstream-mod.apk
-        echo "Your CloudStream modifications are in the source code." >> app/build/outputs/apk/debug/cloudstream-mod.apk
-        
-        # APK release
-        echo "CLOUDSTREAM MOD - RELEASE" > app/build/outputs/apk/release/cloudstream-mod-release.apk
-        echo "" >> app/build/outputs/apk/release/cloudstream-mod-release.apk
-        echo "Build date: $(date)" >> app/build/outputs/apk/release/cloudstream-mod-release.apk
-        echo "" >> app/build/outputs/apk/release/cloudstream-mod-release.apk
-        echo "This is a placeholder APK file." >> app/build/outputs/apk/release/cloudstream-mod-release.apk
-        echo "The actual compilation might have failed." >> app/build/outputs/apk/release/cloudstream-mod-release.apk
-        echo "Check logs above for errors." >> app/build/outputs/apk/release/cloudstream-mod-release.apk
-        
-        echo "✅ APK files created"
-        
-    - name: Upload APK Artifacts
+    - name: Upload REAL APK
       uses: actions/upload-artifact@v4
       with:
-        name: CloudStream-Mod-APK
+        name: CloudStream-Real-APK
         path: |
           app/build/outputs/apk/debug/*.apk
-          app/build/outputs/apk/release/*.apk
+          app/build/outputs/apk/debug/
+          */build/outputs/apk/**/*.apk
         if-no-files-found: error
         retention-days: 30
+        
+    - name: Create backup placeholder (if build fails)
+      if: failure()
+      run: |
+        echo "Build failed, creating diagnostic placeholder..."
+        mkdir -p diagnostic-apk
+        echo "CLOUDSTREAM BUILD FAILED" > diagnostic-apk/error.txt
+        echo "Check logs above for compilation errors" >> diagnostic-apk/error.txt
+        echo "Project: CS-Enhanced" >> diagnostic-apk/error.txt
+        echo "Date: $(date)" >> diagnostic-apk/error.txt
+        # Rinomina in .apk per l'upload
+        mv diagnostic-apk/error.txt diagnostic-apk/diagnostic.apk
+        
+    - name: Upload diagnostic info
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build-Diagnostics
+        path: diagnostic-apk/diagnostic.apk
