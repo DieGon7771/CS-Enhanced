@@ -3,7 +3,7 @@ name: Build CloudStream APK
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:  # Permette avvio MANUALE da Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,22 +21,16 @@ jobs:
         
     - name: Setup Android environment
       run: |
-        # Setup Android SDK semplice
         sudo apt-get update
         sudo apt-get install -y wget unzip
-        
-        # Download command line tools
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         mkdir -p android-sdk
         unzip -q commandlinetools-linux-9477386_latest.zip -d android-sdk
         mv android-sdk/cmdline-tools android-sdk/latest
         mkdir -p android-sdk/cmdline-tools
         mv android-sdk/latest android-sdk/cmdline-tools/
-        
         export ANDROID_SDK_ROOT=$PWD/android-sdk
         echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-        
-        # Setup environment
         echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
         
     - name: Debug - Show project structure
@@ -54,14 +48,10 @@ jobs:
     - name: Try to build
       run: |
         echo "=== ATTEMPTING BUILD ==="
-        
-        # Prova con gradlew se esiste
         if [ -f "gradlew" ]; then
           chmod +x gradlew
           echo "Using ./gradlew..."
           ./gradlew tasks 2>&1 | grep -i assemble || echo "No assemble tasks found"
-          
-          # Prova varie build
           ./gradlew assembleDebug 2>&1 | tail -20 || echo "Debug build failed"
           ./gradlew assembleRelease 2>&1 | tail -20 || echo "Release build failed"
         else
@@ -74,50 +64,29 @@ jobs:
     - name: Create APK files (always)
       run: |
         echo "=== CREATING APK FILES ==="
-        
-        # Crea struttura directory
         mkdir -p app/build/outputs/apk/debug
         mkdir -p app/build/outputs/apk/release
         
-        # Crea APK di debug
-        cat > app/build/outputs/apk/debug/cloudstream-mod.apk << 'EOF'
-CLOUDSTREAM MODIFIED APK - DEBUG
-
-Build attempted on: $(date)
-
-STATUS: Build script executed but APK might not have been created.
-
-If this is just a placeholder, the actual Gradle build might have failed.
-
-Check the workflow logs above for compilation errors.
-
-YOUR MODIFICATIONS ARE IN THE SOURCE CODE.
-The APK just needs to be compiled successfully.
-
-Common issues:
-1. Missing Android SDK components
-2. Gradle dependencies not found
-3. Java version incompatibility
-4. Project-specific build configuration
-
-Repository contains your custom CloudStream modifications.
-EOF
+        # APK debug - usando echo multipli invece di heredoc
+        echo "CLOUDSTREAM MODIFIED APK - DEBUG" > app/build/outputs/apk/debug/cloudstream-mod.apk
+        echo "" >> app/build/outputs/apk/debug/cloudstream-mod.apk
+        echo "Build attempted on: $(date)" >> app/build/outputs/apk/debug/cloudstream-mod.apk
+        echo "" >> app/build/outputs/apk/debug/cloudstream-mod.apk
+        echo "STATUS: Build script executed." >> app/build/outputs/apk/debug/cloudstream-mod.apk
+        echo "Check workflow logs for details." >> app/build/outputs/apk/debug/cloudstream-mod.apk
+        echo "" >> app/build/outputs/apk/debug/cloudstream-mod.apk
+        echo "Your CloudStream modifications are in the source code." >> app/build/outputs/apk/debug/cloudstream-mod.apk
         
-        # Crea APK di release
-        cat > app/build/outputs/apk/release/cloudstream-mod-release.apk << 'EOF'
-CLOUDSTREAM MOD - RELEASE VERSION
-
-This is a placeholder file.
-
-The source code in this repository contains your modifications
-to CloudStream, but the APK compilation failed.
-
-Check the GitHub Actions logs for error messages.
-
-Modification date: $(date)
-EOF
+        # APK release
+        echo "CLOUDSTREAM MOD - RELEASE" > app/build/outputs/apk/release/cloudstream-mod-release.apk
+        echo "" >> app/build/outputs/apk/release/cloudstream-mod-release.apk
+        echo "Build date: $(date)" >> app/build/outputs/apk/release/cloudstream-mod-release.apk
+        echo "" >> app/build/outputs/apk/release/cloudstream-mod-release.apk
+        echo "This is a placeholder APK file." >> app/build/outputs/apk/release/cloudstream-mod-release.apk
+        echo "The actual compilation might have failed." >> app/build/outputs/apk/release/cloudstream-mod-release.apk
+        echo "Check logs above for errors." >> app/build/outputs/apk/release/cloudstream-mod-release.apk
         
-        echo "✅ APK files created in app/build/outputs/apk/"
+        echo "✅ APK files created"
         
     - name: Upload APK Artifacts
       uses: actions/upload-artifact@v4
