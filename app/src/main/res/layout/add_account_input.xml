@@ -8,7 +8,6 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <!-- TITOLO -->
     <TextView
         android:id="@+id/text1"
         android:layout_width="match_parent"
@@ -20,115 +19,80 @@
         android:textStyle="bold"
         tools:text="Account Login" />
 
-    <!-- USERNAME -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/username_container"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:hint="@string/example_username"
-        app:boxBackgroundMode="outline"
-        app:boxBackgroundColor="?attr/boxItemBackground"
-        app:hintTextColor="?attr/grayTextColor"
-        app:startIconDrawable="@drawable/ic_baseline_person_24"
-        app:startIconTint="?attr/iconColor">
+        android:orientation="vertical">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <EditText
             android:id="@+id/login_username_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:autofillHints="username"
+            android:backgroundTint="?attr/colorPrimary"
+            android:hint="@string/example_username"
             android:inputType="text"
-            android:nextFocusDown="@id/email_container"
+            android:nextFocusDown="@id/login_email_input"
             android:textColor="?attr/textColor"
-            android:textSize="14sp" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:textColorHint="?attr/grayTextColor"
+            android:textSize="14sp"
+            tools:ignore="LabelFor" />
 
-    <!-- EMAIL -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/email_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:hint="@string/example_email"
-        app:boxBackgroundMode="outline"
-        app:boxBackgroundColor="?attr/boxItemBackground"
-        app:hintTextColor="?attr/grayTextColor"
-        app:startIconDrawable="@drawable/ic_baseline_email_24"
-        app:startIconTint="?attr/iconColor">
-
-        <com.google.android.material.textfield.TextInputEditText
+        <EditText
             android:id="@+id/login_email_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:autofillHints="emailAddress"
+            android:backgroundTint="?attr/colorPrimary"
+            android:hint="@string/example_email"
             android:inputType="textEmailAddress"
-            android:nextFocusDown="@id/server_container"
-            android:nextFocusUp="@id/username_container"
+            android:nextFocusDown="@id/login_server_input"
+            android:nextFocusUp="@id/login_username_input"
             android:textColor="?attr/textColor"
-            android:textSize="14sp" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:textColorHint="?attr/grayTextColor"
+            android:textSize="14sp"
+            tools:ignore="LabelFor" />
 
-    <!-- SERVER (opzionale, probabilmente) -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/server_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:hint="@string/example_ip"
-        app:boxBackgroundMode="outline"
-        app:boxBackgroundColor="?attr/boxItemBackground"
-        app:hintTextColor="?attr/grayTextColor"
-        app:startIconDrawable="@drawable/ic_baseline_dns_24"
-        app:startIconTint="?attr/iconColor">
-
-        <com.google.android.material.textfield.TextInputEditText
+        <EditText
             android:id="@+id/login_server_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autofillHints="url"
+            android:layout_marginBottom="16dp"
+            android:autofillHints="no"
+            android:backgroundTint="?attr/colorPrimary"
+            android:hint="@string/example_ip"
             android:inputType="textUri"
-            android:nextFocusDown="@id/password_container"
-            android:nextFocusUp="@id/email_container"
+            android:nextFocusDown="@id/login_password_input"
+            android:nextFocusUp="@id/login_email_input"
             android:textColor="?attr/textColor"
-            android:textSize="14sp" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:textColorHint="?attr/grayTextColor"
+            android:textSize="14sp"
+            tools:ignore="LabelFor" />
 
-    <!-- PASSWORD -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/password_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        app:hint="@string/example_password"
-        app:boxBackgroundMode="outline"
-        app:boxBackgroundColor="?attr/boxItemBackground"
-        app:hintTextColor="?attr/grayTextColor"
-        app:startIconDrawable="@drawable/ic_baseline_lock_24"
-        app:startIconTint="?attr/iconColor"
-        app:endIconMode="password_toggle"
-        app:endIconTint="?attr/iconColor">
-
-        <com.google.android.material.textfield.TextInputEditText
+        <EditText
             android:id="@+id/login_password_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
             android:autofillHints="password"
+            android:backgroundTint="?attr/colorPrimary"
+            android:hint="@string/example_password"
             android:inputType="textPassword"
-            android:nextFocusUp="@id/server_container"
+            android:nextFocusUp="@id/login_server_input"
             android:textColor="?attr/textColor"
-            android:textSize="14sp" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:textColorHint="?attr/grayTextColor"
+            android:textSize="14sp"
+            tools:ignore="LabelFor" />
+    </LinearLayout>
 
-    <!-- BOTTONI -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="space_between"
-        android:paddingTop="8dp">
+        android:gravity="space_between">
 
-        <!-- BOTTONE CREA ACCOUNT -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/create_account"
             style="@style/WhiteButton"
@@ -142,7 +106,6 @@
             app:strokeColor="?attr/colorPrimary"
             app:strokeWidth="1dp" />
 
-        <!-- BOTTONI LOGIN/CANCEL -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
