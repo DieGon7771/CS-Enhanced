@@ -34,12 +34,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        app:hint="@string/repository_name_hint"
+        android:hint="@string/repository_name_hint"
         app:boxBackgroundMode="outline"
-        app:boxBackgroundColor="?attr/boxItemBackground"
-        app:hintTextColor="?attr/grayTextColor"
-        app:startIconDrawable="@drawable/ic_baseline_title_24"
-        app:startIconTint="?attr/iconColor">
+        app:boxBackgroundColor="?attr/boxItemBackground">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/repo_name_input"
@@ -66,12 +63,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        app:hint="@string/repository_url_hint"
+        android:hint="@string/repository_url_hint"
         app:boxBackgroundMode="outline"
-        app:boxBackgroundColor="?attr/boxItemBackground"
-        app:hintTextColor="?attr/grayTextColor"
-        app:startIconDrawable="@drawable/ic_baseline_link_24"
-        app:startIconTint="?attr/iconColor">
+        app:boxBackgroundColor="?attr/boxItemBackground">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/repo_url_input"
