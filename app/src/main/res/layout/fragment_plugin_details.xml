@@ -17,7 +17,7 @@
         android:orientation="horizontal"
         android:paddingBottom="16dp">
 
-        <!-- ICONA -->
+        <!-- ICONA - FIX: Aggiunto android:src -->
         <androidx.cardview.widget.CardView
             android:layout_width="56dp"
             android:layout_height="56dp"
@@ -30,9 +30,9 @@
                 android:layout_height="match_parent"
                 android:padding="14dp"
                 android:scaleType="centerInside"
+                android:src="@drawable/ic_baseline_extension_24" <!-- FIX: android:src invece di tools:src -->
                 app:tint="@android:color/white"
-                tools:ignore="ContentDescription"
-                tools:src="@drawable/ic_baseline_extension_24" />
+                tools:ignore="ContentDescription" />
         </androidx.cardview.widget.CardView>
 
         <!-- NOME -->
@@ -83,7 +83,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- DESCRIZIONE (SEPARATA) -->
+    <!-- DESCRIZIONE (SEPARATA) - Migliorato per contenuto lungo -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -91,7 +91,8 @@
         android:background="?attr/boxItemBackground"
         android:padding="16dp"
         android:layout_marginBottom="12dp"
-        android:elevation="2dp">
+        android:elevation="2dp"
+        android:minHeight="80dp"> <!-- FIX: Altezza minima per contenuto breve -->
 
         <TextView
             android:layout_width="wrap_content"
@@ -108,7 +109,9 @@
             android:layout_height="wrap_content"
             android:textColor="?attr/textColor"
             android:textSize="14sp"
-            android:lineSpacingExtra="2sp"
+            android:lineSpacingExtra="4sp" <!-- FIX: Aumentato spacing per leggibilità -->
+            android:maxLines="20" <!-- FIX: Limite massimo linee -->
+            android:scrollbars="vertical" <!-- FIX: Abilita scroll se necessario -->
             tools:text="This is a plugin description that explains what this extension does in detail." />
     </LinearLayout>
 
@@ -160,7 +163,7 @@
             <TextView
                 android:id="@+id/plugin_status"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+ android:layout_height="wrap_content"
                 android:textColor="?attr/colorPrimary"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -259,14 +262,17 @@
             tools:text="English, Spanish, French" />
     </LinearLayout>
 
-    <!-- VOTI -->
+    <!-- VOTI - FIX COMPLETO: Rimosso background colorato, migliorato contrasto -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:background="?attr/boxItemBackground" <!-- FIX: Background uniforme -->
+        android:padding="8dp"
+        android:elevation="2dp">
 
         <TextView
             android:id="@+id/plugin_votes"
@@ -276,19 +282,27 @@
             android:textColor="?attr/textColor"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:paddingEnd="12dp" />
+            android:paddingEnd="16dp" />
 
-        <ImageView
-            android:id="@+id/upvote"
+        <!-- FIX: Bottone like con stato chiaro -->
+        <androidx.cardview.widget.CardView
             android:layout_width="52dp"
             android:layout_height="52dp"
-            android:background="?attr/colorPrimary"
-            android:backgroundTint="?attr/colorPrimary"
-            android:contentDescription="Upvote"
-            android:focusable="true"
-            android:padding="14dp"
-            app:srcCompat="@drawable/ic_baseline_thumb_up_24"
-            app:tint="@android:color/white" />
+            app:cardCornerRadius="26dp"
+            app:cardBackgroundColor="?attr/boxItemBackground"
+            app:cardElevation="2dp">
+
+            <ImageView
+                android:id="@+id/upvote"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Upvote"
+                android:focusable="true"
+                android:padding="14dp"
+                android:background="?attr/selectableItemBackground" <!-- FIX: Ripple effect -->
+                app:srcCompat="@drawable/ic_baseline_thumb_up_24"
+                app:tint="?attr/colorPrimary" /> <!-- FIX: Colore normale -->
+        </androidx.cardview.widget.CardView>
     </LinearLayout>
 
 </LinearLayout>
