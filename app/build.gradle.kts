@@ -15,6 +15,12 @@ val javaTarget = JvmTarget.fromTarget(libs.versions.jvmTarget.get())
 val tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
 val prereleaseStoreFile: File? = File(tmpFilePath).listFiles()?.first()
 
+// AGGIUNTA: Funzione per il debug keystore
+fun getDebugKeystore(): File? {
+    val debugKeystore = file("debug.keystore")
+    return if (debugKeystore.exists()) debugKeystore else null
+}
+
 fun getGitCommitHash(): String {
     return try {
         val headFile = file("${project.rootDir}/.git/HEAD")
@@ -46,6 +52,17 @@ android {
     }
 
     signingConfigs {
+        // AGGIUNTA: Configurazione per debug key personale
+        create("myDebug") {
+            val debugKeystore = getDebugKeystore()
+            if (debugKeystore != null) {
+                storeFile = debugKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+
         if (prereleaseStoreFile != null) {
             create("prerelease") {
                 storeFile = file(prereleaseStoreFile)
@@ -62,7 +79,7 @@ android {
         applicationId = "com.lagradost.cloudstream3"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 69
+        versionCode = 70  // INCREMENTA QUESTO OGNI BUILD!
         versionName = "4.6.2"
 
         resValue("string", "commit_hash", getGitCommitHash())
@@ -103,6 +120,8 @@ android {
         debug {
             isDebuggable = true
             applicationIdSuffix = ".debug"
+            // AGGIUNTA: Usa la debug key personale
+            signingConfig = signingConfigs.getByName("myDebug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -135,11 +154,11 @@ android {
     }
 
     java {
-	    // Use Java 17 toolchain even if a higher JDK runs the build.
+        // Use Java 17 toolchain even if a higher JDK runs the build.
         // We still use Java 8 for now which higher JDKs have deprecated.
-	    toolchain {
-		    languageVersion.set(JavaLanguageVersion.of(libs.versions.jdkToolchain.get()))
-    	}
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(libs.versions.jdkToolchain.get()))
+        }
     }
 
     lint {
