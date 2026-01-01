@@ -15,16 +15,25 @@ val javaTarget = JvmTarget.fromTarget(libs.versions.jvmTarget.get())
 val tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
 val prereleaseStoreFile: File? = File(tmpFilePath).listFiles()?.first()
 
-// AGGIUNTA: Funzione per il debug keystore - CORRETTA
-fun getDebugKeystore(): File? {
-    val debugKeystore = file("debug.keystore")  // CORRETTO: cerca in app/debug.keystore
+// AGGIUNTA: Funzione per il debug keystore - MODIFICATA per usare SEMPRE la stessa
+fun getDebugKeystore(): File {
+    val debugKeystore = file("debug.keystore")  // CERCA in app/debug.keystore
+    
     return if (debugKeystore.exists()) {
-        println("✅ Trovato debug.keystore in: ${debugKeystore.absolutePath}")
+        println("✅ TROVATO debug.keystore PERSONALE")
+        println("📁 Path: ${debugKeystore.absolutePath}")
+        println("🔑 Questa chiave sarà usata SEMPRE per tutte le build")
+        println("🔄 Permetterà aggiornamenti automatici")
         debugKeystore
     } else {
-        println("❌ debug.keystore NON trovato!")
+        // ERRORE CRITICO: la keystore deve esistere nel repository
+        println("❌ ERRORE CRITICO: debug.keystore NON TROVATA!")
         println("   Cercato in: ${debugKeystore.absolutePath}")
-        // Debug: mostra cosa c'è nella cartella corrente
+        println("   ⚠️  Assicurati che il file debug.keystore sia nella cartella app/")
+        println("   ⚠️  Questo file deve essere COMMITTATO nel repository")
+        println("   ⚠️  Altrimenti ogni build avrà una firma diversa")
+        
+        // Mostra il contenuto della directory per debug
         try {
             val currentDir = file(".")
             if (currentDir.exists()) {
@@ -34,7 +43,8 @@ fun getDebugKeystore(): File? {
         } catch (e: Exception) {
             println("   Errore leggendo directory: ${e.message}")
         }
-        null
+        
+        throw GradleException("debug.keystore non trovata nel repository! Senza questa, gli aggiornamenti NON funzioneranno.")
     }
 }
 
@@ -69,19 +79,20 @@ android {
     }
 
     signingConfigs {
-        // AGGIUNTA: Configurazione per debug key personale - MIGLIORATA
+        // AGGIUNTA: Configurazione per debug key personale - OBBLIGATORIA
         create("myDebug") {
-            val debugKeystore = getDebugKeystore()
-            if (debugKeystore != null) {
-                storeFile = debugKeystore
-                storePassword = "android"
-                keyAlias = "androiddebugkey"
-                keyPassword = "android"
-                println("✅ Keystore configurato correttamente: ${storeFile?.absolutePath}")
-            } else {
-                println("⚠️  ATTENZIONE: Usando debug key di default (potrebbe non aggiornare!)")
-                // Se non trova il nostro keystore, non impostare nulla → userà default
-            }
+            val debugKeystore = getDebugKeystore()  // USA SEMPRE la stessa keystore
+            
+            storeFile = debugKeystore
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            
+            println("✅ Keystore configurata CORRETTAMENTE")
+            println("   Store: ${storeFile.absolutePath}")
+            println("   Alias: $keyAlias")
+            println("   🔒 Password: ****** (android)")
+            println("   📦 Questa configurazione permette AGGIORNAMENTI AUTOMATICI")
         }
 
         if (prereleaseStoreFile != null) {
@@ -141,7 +152,7 @@ android {
         debug {
             isDebuggable = true
             applicationIdSuffix = ".debug"
-            // AGGIUNTA: Usa la debug key personale - OBBLIGATORIA
+            // OBBLIGATORIO: Usa SEMPRE la stessa debug key personale
             signingConfig = signingConfigs.getByName("myDebug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
