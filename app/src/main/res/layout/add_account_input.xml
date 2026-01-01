@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp"> <!-- FIX: Padding uniforme -->
+    android:padding="20dp">
 
     <!-- INTESTAZIONE -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp" <!-- FIX: Margine consistente -->
+        android:layout_marginBottom="24dp"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
@@ -23,7 +23,7 @@
             android:textColor="?attr/textColor"
             android:textSize="22sp"
             android:textStyle="bold"
-            tools:text="Account Login" /> <!-- FIX: Testo più descrittivo -->
+            tools:text="Account Login" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/create_account"
@@ -32,16 +32,16 @@
             android:layout_height="wrap_content"
             android:text="@string/create_account"
             app:icon="@drawable/ic_baseline_add_24"
-            app:iconGravity="textStart" /> <!-- FIX: Icona allineata -->
+            app:iconGravity="textStart" />
     </LinearLayout>
 
-    <!-- FORM INPUTS - MIGLIORATO -->
+    <!-- FORM INPUTS -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:paddingHorizontal="4dp"> <!-- FIX: Padding leggero -->
+        android:paddingHorizontal="4dp">
 
         <!-- USERNAME -->
         <com.google.android.material.textfield.TextInputLayout
@@ -111,7 +111,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxBackgroundColor="?attr/boxItemBackground"
             app:hintTextColor="?attr/grayTextColor"
-            app:endIconMode="password_toggle"> <!-- FIX: Icona show/hide password -->
+            app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/login_password_input"
@@ -125,7 +125,7 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
-    <!-- BOTTONI - POSIZIONATI CORRETTAMENTE -->
+    <!-- BOTTONI -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -140,7 +140,7 @@
             android:layout_height="52dp"
             android:layout_marginEnd="12dp"
             android:text="@string/sort_cancel"
-            android:textColor="?attr/colorPrimary" <!-- FIX: Testo visibile -->
+            android:textColor="?attr/colorPrimary"
             app:backgroundTint="?attr/boxItemBackground"
             app:strokeColor="?attr/colorPrimary"
             app:strokeWidth="1dp" />
