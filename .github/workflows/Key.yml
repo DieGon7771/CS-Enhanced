@@ -1,0 +1,42 @@
+name: Create Debug Keystore
+
+on:
+  workflow_dispatch:  # Puoi avviarla manualmente
+
+jobs:
+  create-keystore:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Create debug keystore
+      run: |
+        cd app
+        keytool -genkey -v \
+          -keystore debug.keystore \
+          -storepass android \
+          -alias androiddebugkey \
+          -keypass android \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -dname "CN=CloudStream Mod, OU=Mod, O=Mod, L=Roma, ST=Italy, C=IT"
+        
+        echo "✅ Keystore creato in app/debug.keystore"
+        ls -la debug.keystore
+    
+    - name: Commit keystore
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add app/debug.keystore
+        git commit -m "Add debug keystore for app updates" || echo "No changes to commit"
+        git push
