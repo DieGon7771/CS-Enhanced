@@ -88,8 +88,11 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
             
+            // Usa una variabile sicura per evitare problemi null
+            val safeStoreFile = storeFile!!
+            
             println("✅ Keystore configurata CORRETTAMENTE")
-            println("   Store: ${storeFile.absolutePath}")
+            println("   Store: ${safeStoreFile.absolutePath}")
             println("   Alias: $keyAlias")
             println("   🔒 Password: ****** (android)")
             println("   📦 Questa configurazione permette AGGIORNAMENTI AUTOMATICI")
