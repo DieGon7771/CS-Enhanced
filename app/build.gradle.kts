@@ -15,10 +15,27 @@ val javaTarget = JvmTarget.fromTarget(libs.versions.jvmTarget.get())
 val tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
 val prereleaseStoreFile: File? = File(tmpFilePath).listFiles()?.first()
 
-// AGGIUNTA: Funzione per il debug keystore
+// AGGIUNTA: Funzione per il debug keystore - CORRETTA
 fun getDebugKeystore(): File? {
-    val debugKeystore = file("debug.keystore")
-    return if (debugKeystore.exists()) debugKeystore else null
+    val debugKeystore = file("app/debug.keystore")  // CORRETTO: "app/" davanti
+    return if (debugKeystore.exists()) {
+        println("✅ Trovato debug.keystore in: ${debugKeystore.absolutePath}")
+        debugKeystore
+    } else {
+        println("❌ debug.keystore NON trovato!")
+        println("   Cercato in: ${debugKeystore.absolutePath}")
+        // Debug: mostra cosa c'è nella cartella app
+        try {
+            val appDir = file("app")
+            if (appDir.exists()) {
+                println("📁 Contenuto di app/:")
+                appDir.listFiles()?.forEach { println("   - ${it.name}") }
+            }
+        } catch (e: Exception) {
+            println("   Errore leggendo cartella app: ${e.message}")
+        }
+        null
+    }
 }
 
 fun getGitCommitHash(): String {
@@ -52,7 +69,7 @@ android {
     }
 
     signingConfigs {
-        // AGGIUNTA: Configurazione per debug key personale
+        // AGGIUNTA: Configurazione per debug key personale - MIGLIORATA
         create("myDebug") {
             val debugKeystore = getDebugKeystore()
             if (debugKeystore != null) {
@@ -60,6 +77,10 @@ android {
                 storePassword = "android"
                 keyAlias = "androiddebugkey"
                 keyPassword = "android"
+                println("✅ Keystore configurato correttamente")
+            } else {
+                println("⚠️  ATTENZIONE: Usando debug key di default (potrebbe non aggiornare!)")
+                // Se non trova il nostro keystore, usa quello di default (comportamento precedente)
             }
         }
 
@@ -79,8 +100,8 @@ android {
         applicationId = "com.lagradost.cloudstream3"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 71  // INCREMENTA QUESTO OGNI BUILD!
-        versionName = "4.6.21"
+        versionCode = 71  // INCREMENTATO! (70 → 71)
+        versionName = "4.6.2"
 
         resValue("string", "commit_hash", getGitCommitHash())
 
@@ -120,7 +141,7 @@ android {
         debug {
             isDebuggable = true
             applicationIdSuffix = ".debug"
-            // AGGIUNTA: Usa la debug key personale
+            // AGGIUNTA: Usa la debug key personale - OBBLIGATORIA
             signingConfig = signingConfigs.getByName("myDebug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
