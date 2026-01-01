@@ -6,18 +6,18 @@
     android:layout_height="match_parent"
     android:background="?attr/primaryGrayBackground"
     android:orientation="vertical"
-    android:padding="24dp">  <!-- 👈 Aumentato padding da 20dp a 24dp -->
+    android:padding="24dp">
 
     <!-- TITOLO - Migliorato -->
     <TextView
         android:id="@+id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"  <!-- 👈 Aumentato margine -->
+        android:layout_marginBottom="28dp"
         android:gravity="center"
         android:text="@string/add_repository"
         android:textColor="?attr/textColor"
-        android:textSize="24sp"  <!-- 👈 Leggermente più grande -->
+        android:textSize="24sp"
         android:textStyle="bold" />
 
     <!-- NOME REPOSITORY -->
@@ -27,23 +27,23 @@
         android:layout_marginBottom="8dp"
         android:text="Repository Name"
         android:textColor="?attr/textColor"
-        android:textSize="16sp"  <!-- 👈 Leggermente più grande -->
+        android:textSize="16sp"
         android:textStyle="normal" />
 
     <EditText
         android:id="@+id/repo_name_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"  <!-- 👈 Aumentato margine -->
+        android:layout_marginBottom="24dp"
         android:autofillHints="username"
         android:background="?attr/boxItemBackground"
         android:hint="@string/repository_name_hint"
         android:inputType="text"
         android:nextFocusDown="@id/repo_url_input"
-        android:padding="18dp"  <!-- 👈 Aumentato padding -->
+        android:padding="18dp"
         android:textColor="?attr/textColor"
         android:textColorHint="?attr/grayTextColor"
-        android:textSize="16sp"  <!-- 👈 Leggermente più grande -->
+        android:textSize="16sp"
         tools:ignore="LabelFor" />
 
     <!-- URL REPOSITORY -->
@@ -53,23 +53,23 @@
         android:layout_marginBottom="8dp"
         android:text="Repository URL"
         android:textColor="?attr/textColor"
-        android:textSize="16sp"  <!-- 👈 Leggermente più grande -->
+        android:textSize="16sp"
         android:textStyle="normal" />
 
     <EditText
         android:id="@+id/repo_url_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="36dp"  <!-- 👈 Aumentato margine -->
+        android:layout_marginBottom="36dp"
         android:autofillHints="url"
         android:background="?attr/boxItemBackground"
         android:hint="@string/repository_url_hint"
         android:inputType="textUri"
         android:nextFocusUp="@id/repo_name_input"
-        android:padding="18dp"  <!-- 👈 Aumentato padding -->
+        android:padding="18dp"
         android:textColor="?attr/textColor"
         android:textColorHint="?attr/grayTextColor"
-        android:textSize="16sp"  <!-- 👈 Leggermente più grande -->
+        android:textSize="16sp"
         tools:ignore="LabelFor" />
 
     <!-- BOTTONI - FIXATO -->
@@ -78,27 +78,27 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="end"
-        android:paddingTop="12dp">  <!-- 👈 Aumentato padding -->
+        android:paddingTop="12dp">
 
         <!-- PULSANTE ANNULLA - FIX VISIBILITÀ -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cancel_btt"
             style="@style/WhiteButton"
             android:layout_width="wrap_content"
-            android:layout_height="52dp"  <!-- 👈 Leggermente più alto -->
-            android:layout_marginEnd="16dp"  <!-- 👈 Aumentato margine -->
+            android:layout_height="52dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/sort_cancel"
-            android:textColor="?attr/colorPrimary"  <!-- 👈 FIX: TESTO COLORATO VISIBILE -->
+            android:textColor="?attr/colorPrimary"
             app:backgroundTint="?attr/boxItemBackground"
             app:strokeColor="?attr/colorPrimary"
-            app:strokeWidth="1.5dp" />  <!-- 👈 Bordo leggermente più spesso -->
+            app:strokeWidth="1.5dp" />
 
         <!-- PULSANTE APPLICA -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/apply_btt"
             style="@style/WhiteButton"
             android:layout_width="wrap_content"
-            android:layout_height="52dp"  <!-- 👈 Leggermente più alto -->
+            android:layout_height="52dp"
             android:text="@string/add_repository"
             android:textStyle="bold"
             app:backgroundTint="?attr/colorPrimary" />
