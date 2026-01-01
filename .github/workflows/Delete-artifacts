@@ -1,0 +1,42 @@
+name: 🗑️ Delete All Artifacts (Manual)
+
+on:
+  workflow_dispatch:  # Questo lo rende manuale
+
+jobs:
+  delete-artifacts:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write  # Permesso per cancellare artifacts
+    
+    steps:
+      - name: 🗑️ Delete ALL artifacts from this repository
+        run: |
+          # Ottieni tutti gli artifacts NON scaduti
+          echo "Fetching artifacts..."
+          ARTIFACTS=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/actions/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.expired == false) | .id')
+          
+          if [ -z "$ARTIFACTS" ]; then
+            echo "✅ No artifacts found to delete."
+            exit 0
+          fi
+          
+          COUNT=$(echo "$ARTIFACTS" | wc -l)
+          echo "🗑️ Found $COUNT artifacts to delete..."
+          
+          # Cancella ogni artifact
+          for ARTIFACT_ID in $ARTIFACTS; do
+            echo "Deleting artifact ID: $ARTIFACT_ID"
+            gh api \
+              -X DELETE \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID"
+            sleep 0.5  # Rate limit
+          done
+          
+          echo "✅ Successfully deleted $COUNT artifacts."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
