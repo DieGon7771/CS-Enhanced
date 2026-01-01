@@ -17,22 +17,22 @@ val prereleaseStoreFile: File? = File(tmpFilePath).listFiles()?.first()
 
 // AGGIUNTA: Funzione per il debug keystore - CORRETTA
 fun getDebugKeystore(): File? {
-    val debugKeystore = file("debug.keystore")  // CORRETTO: "app/" davanti
+    val debugKeystore = file("debug.keystore")  // CORRETTO: cerca in app/debug.keystore
     return if (debugKeystore.exists()) {
         println("✅ Trovato debug.keystore in: ${debugKeystore.absolutePath}")
         debugKeystore
     } else {
         println("❌ debug.keystore NON trovato!")
         println("   Cercato in: ${debugKeystore.absolutePath}")
-        // Debug: mostra cosa c'è nella cartella app
+        // Debug: mostra cosa c'è nella cartella corrente
         try {
-            val appDir = file("app")
-            if (appDir.exists()) {
-                println("📁 Contenuto di app/:")
-                appDir.listFiles()?.forEach { println("   - ${it.name}") }
+            val currentDir = file(".")
+            if (currentDir.exists()) {
+                println("📁 Contenuto directory corrente:")
+                currentDir.listFiles()?.forEach { println("   - ${it.name} (${if (it.isDirectory) "dir" else "file"})") }
             }
         } catch (e: Exception) {
-            println("   Errore leggendo cartella app: ${e.message}")
+            println("   Errore leggendo directory: ${e.message}")
         }
         null
     }
@@ -77,10 +77,10 @@ android {
                 storePassword = "android"
                 keyAlias = "androiddebugkey"
                 keyPassword = "android"
-                println("✅ Keystore configurato correttamente")
+                println("✅ Keystore configurato correttamente: ${storeFile?.absolutePath}")
             } else {
                 println("⚠️  ATTENZIONE: Usando debug key di default (potrebbe non aggiornare!)")
-                // Se non trova il nostro keystore, usa quello di default (comportamento precedente)
+                // Se non trova il nostro keystore, non impostare nulla → userà default
             }
         }
 
@@ -100,7 +100,7 @@ android {
         applicationId = "com.lagradost.cloudstream3"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 71  // INCREMENTATO! (70 → 71)
+        versionCode = 72  // INCREMENTATO! (71 → 72)
         versionName = "4.6.2"
 
         resValue("string", "commit_hash", getGitCommitHash())
