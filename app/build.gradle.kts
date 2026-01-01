@@ -17,7 +17,7 @@ val prereleaseStoreFile: File? = File(tmpFilePath).listFiles()?.first()
 
 // AGGIUNTA: Funzione per il debug keystore - CORRETTA
 fun getDebugKeystore(): File? {
-    val debugKeystore = file("app/debug.keystore")  // CORRETTO: "app/" davanti
+    val debugKeystore = file("debug.keystore")  // CORRETTO: "app/" davanti
     return if (debugKeystore.exists()) {
         println("✅ Trovato debug.keystore in: ${debugKeystore.absolutePath}")
         debugKeystore
