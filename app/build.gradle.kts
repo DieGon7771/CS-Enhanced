@@ -114,8 +114,8 @@ android {
         applicationId = "com.lagradost.cloudstream3"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 75  // INCREMENTATO! (71 → 72)
-        versionName = "4.6.24"
+        versionCode = 76  // INCREMENTATO! (71 → 72)
+        versionName = "4.6.25"
 
         resValue("string", "commit_hash", getGitCommitHash())
 
