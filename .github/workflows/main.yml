@@ -42,14 +42,17 @@ jobs:
         echo "=== MODULES ==="
         find . -name "build.gradle*" -type f | head -10
         
-    - name: Build CloudStream APK
+    - name: CLEAN AND BUILD CloudStream APK
       run: |
-        echo "Building CloudStream..."
+        echo "🔄 CLEANING previous builds..."
+        ./gradlew clean  # ← MODIFICA AGGIUNTA QUI!
+        
+        echo "🏗️ Building CloudStream..."
         
         # CloudStream usa Kotlin Multiplatform, build speciale
         ./gradlew :app:assembleDebug --no-daemon --stacktrace
         
-        echo "Build completed!"
+        echo "✅ Build completed with CLEAN!"
         
     - name: Find generated APK
       run: |
