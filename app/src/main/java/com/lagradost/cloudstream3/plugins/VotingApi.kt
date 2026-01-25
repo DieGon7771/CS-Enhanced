@@ -15,6 +15,7 @@ import kotlinx.coroutines.sync.withLock
 object VotingApi { // please do not cheat the votes lol
     private const val LOGKEY = "VotingApi"
 
+    // CORRETTO: URL API nel formato giusto
     private const val API_DOMAIN = "https://counterapi.com/api"
 
     private fun transformUrl(url: String): String = // dont touch or all votes get reset
@@ -49,15 +50,37 @@ object VotingApi { // please do not cheat the votes lol
         .joinToString("-")
 
     private suspend fun readVote(pluginUrl: String): Int {
-        val url = "${API_DOMAIN}/cs-${getRepository(pluginUrl)}/vote/${transformUrl(pluginUrl)}?readOnly=true"
+        // MODIFICATO: Costruisce l'URL nel formato corretto
+        val namespace = "cs-${getRepository(pluginUrl)}"
+        val action = "vote"
+        val key = transformUrl(pluginUrl)
+        
+        val url = "$API_DOMAIN/$namespace/$action/$key?readOnly=true"
         Log.d(LOGKEY, "Requesting: $url")
-        return app.get(url).parsedSafe<Result>()?.value ?: 0
+        
+        return try {
+            app.get(url).parsedSafe<Result>()?.value ?: 0
+        } catch (e: Exception) {
+            Log.e(LOGKEY, "Failed to read votes: ${e.message}")
+            0
+        }
     }
 
     private suspend fun writeVote(pluginUrl: String): Boolean {
-        val url = "${API_DOMAIN}/cs-${getRepository(pluginUrl)}/vote/${transformUrl(pluginUrl)}"
+        // MODIFICATO: Costruisce l'URL nel formato corretto
+        val namespace = "cs-${getRepository(pluginUrl)}"
+        val action = "vote"
+        val key = transformUrl(pluginUrl)
+        
+        val url = "$API_DOMAIN/$namespace/$action/$key"
         Log.d(LOGKEY, "Requesting: $url")
-        return app.get(url).parsedSafe<Result>()?.value != null
+        
+        return try {
+            app.get(url).parsedSafe<Result>()?.value != null
+        } catch (e: Exception) {
+            Log.e(LOGKEY, "Failed to write vote: ${e.message}")
+            false
+        }
     }
 
     suspend fun getVotes(pluginUrl: String): Int =
