@@ -36,16 +36,16 @@ object VotingApi {
         val id = transformUrl(pluginUrl)
         val url = "$API_DOMAIN/get-total/$id"
         Log.d(LOGKEY, "Requesting GET: $url")
-        return app.get(url).parsedSafe<CountifyResult>()?.value ?: 0
+        return app.get(url).parsedSafe<CountifyResult>()?.count ?: 0
     }
 
-    // Scrittura voto su Countify (usa Map<String,String> vuota)
+    // Scrittura voto su Countify (POST con map vuota)
     private suspend fun writeVote(pluginUrl: String): Boolean {
         val id = transformUrl(pluginUrl)
         val url = "$API_DOMAIN/increment/$id"
         Log.d(LOGKEY, "Requesting POST: $url")
         return app.post(url, emptyMap<String, String>())
-            .parsedSafe<CountifyResult>()?.value != null
+            .parsedSafe<CountifyResult>()?.count != null
     }
 
     suspend fun getVotes(pluginUrl: String): Int =
@@ -97,6 +97,6 @@ object VotingApi {
     // Classe per JSON Countify
     private data class CountifyResult(
         val id: String? = null,
-        val value: Int? = null
+        val count: Int? = null
     )
 }
