@@ -11,12 +11,16 @@ import com.lagradost.cloudstream3.app
 import com.lagradost.cloudstream3.utils.Coroutines.main
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 
-object VotingApi { // please do not cheat the votes lol
+object VotingApi {
+
     private const val LOGKEY = "VotingApi"
-    private const val API_DOMAIN = "https://counterapi.com/api"
+    private const val API_DOMAIN = "https://api.countify.xyz"
 
-    private fun transformUrl(url: String): String = // dont touch or all votes get reset
+    // Trasforma URL plugin in ID unico
+    private fun transformUrl(url: String): String =
         MessageDigest
             .getInstance("SHA-256")
             .digest("${url}#funny-salt".toByteArray())
@@ -27,38 +31,25 @@ object VotingApi { // please do not cheat the votes lol
     suspend fun SitePlugin.vote(): Int = vote(url)
     fun SitePlugin.canVote(): Boolean = canVote(this.url)
 
-    // Plugin url to Int
     private val votesCache = mutableMapOf<String, Int>()
 
-    private fun getRepository(pluginUrl: String) = pluginUrl
-        .split("/")
-        .drop(2)
-        .take(3)
-        .joinToString("-")
-
+    // Lettura voti da Countify
     private suspend fun readVote(pluginUrl: String): Int {
-        val url =
-            "${API_DOMAIN}/cs-${getRepository(pluginUrl)}/vote/${transformUrl(pluginUrl)}" +
-            "?readOnly=true&cache=false"
-
-        Log.d(LOGKEY, "Requesting: $url")
-
-        return app.get(url)
-            .parsedSafe<Result>()
-            ?.resolvedValue()
-            ?: 0
+        val id = transformUrl(pluginUrl)
+        val url = "$API_DOMAIN/get-total/$id"
+        Log.d(LOGKEY, "Requesting GET: $url")
+        return app.get(url).parsedSafe<CountifyResult>()?.value ?: 0
     }
 
+    // Scrittura voto su Countify
     private suspend fun writeVote(pluginUrl: String): Boolean {
-        val url =
-            "${API_DOMAIN}/cs-${getRepository(pluginUrl)}/vote/${transformUrl(pluginUrl)}" +
-            "?cache=false"
-
-        Log.d(LOGKEY, "Requesting: $url")
-
-        return app.get(url)
-            .parsedSafe<Result>()
-            ?.resolvedValue() != null
+        val id = transformUrl(pluginUrl)
+        val url = "$API_DOMAIN/increment/$id"
+        Log.d(LOGKEY, "Requesting POST: $url")
+        // Countify usa POST senza body
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val body = "{}".toRequestBody(mediaType)
+        return app.post(url, body).parsedSafe<CountifyResult>()?.value != null
     }
 
     suspend fun getVotes(pluginUrl: String): Int =
@@ -66,7 +57,7 @@ object VotingApi { // please do not cheat the votes lol
             votesCache[pluginUrl] = it
         }
 
-    fun hasVoted(pluginUrl: String): Boolean =
+    fun hasVoted(pluginUrl: String) =
         getKey("cs3-votes/${transformUrl(pluginUrl)}") ?: false
 
     fun canVote(pluginUrl: String): Boolean =
@@ -107,15 +98,9 @@ object VotingApi { // please do not cheat the votes lol
         }
     }
 
-    /**
-     * Supporta:
-     * - API legacy → { "value": Int }
-     * - API nuova   → { "count": Int, ... }
-     */
-    private data class Result(
-        val value: Int? = null,
-        val count: Int? = null
-    ) {
-        fun resolvedValue(): Int? = value ?: count
-    }
+    // Classe per JSON Countify
+    private data class CountifyResult(
+        val id: String? = null,
+        val value: Int? = null
+    )
 }
