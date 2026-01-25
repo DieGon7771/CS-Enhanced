@@ -14,8 +14,6 @@ import kotlinx.coroutines.sync.withLock
 
 object VotingApi { // please do not cheat the votes lol
     private const val LOGKEY = "VotingApi"
-
-    // CORRETTO: URL API nel formato giusto
     private const val API_DOMAIN = "https://counterapi.com/api"
 
     private fun transformUrl(url: String): String = // dont touch or all votes get reset
@@ -24,21 +22,10 @@ object VotingApi { // please do not cheat the votes lol
             .digest("${url}#funny-salt".toByteArray())
             .fold("") { str, it -> str + "%02x".format(it) }
 
-    suspend fun SitePlugin.getVotes(): Int {
-        return getVotes(url)
-    }
-
-    fun SitePlugin.hasVoted(): Boolean {
-        return hasVoted(url)
-    }
-
-    suspend fun SitePlugin.vote(): Int {
-        return vote(url)
-    }
-
-    fun SitePlugin.canVote(): Boolean {
-        return canVote(this.url)
-    }
+    suspend fun SitePlugin.getVotes(): Int = getVotes(url)
+    fun SitePlugin.hasVoted(): Boolean = hasVoted(url)
+    suspend fun SitePlugin.vote(): Int = vote(url)
+    fun SitePlugin.canVote(): Boolean = canVote(this.url)
 
     // Plugin url to Int
     private val votesCache = mutableMapOf<String, Int>()
@@ -50,71 +37,66 @@ object VotingApi { // please do not cheat the votes lol
         .joinToString("-")
 
     private suspend fun readVote(pluginUrl: String): Int {
-        // MODIFICATO: Costruisce l'URL nel formato corretto
-        val namespace = "cs-${getRepository(pluginUrl)}"
-        val action = "vote"
-        val key = transformUrl(pluginUrl)
-        
-        val url = "$API_DOMAIN/$namespace/$action/$key?readOnly=true"
+        val url =
+            "${API_DOMAIN}/cs-${getRepository(pluginUrl)}/vote/${transformUrl(pluginUrl)}" +
+            "?readOnly=true&cache=false"
+
         Log.d(LOGKEY, "Requesting: $url")
-        
-        return try {
-            app.get(url).parsedSafe<Result>()?.value ?: 0
-        } catch (e: Exception) {
-            Log.e(LOGKEY, "Failed to read votes: ${e.message}")
-            0
-        }
+
+        return app.get(url)
+            .parsedSafe<Result>()
+            ?.resolvedValue()
+            ?: 0
     }
 
     private suspend fun writeVote(pluginUrl: String): Boolean {
-        // MODIFICATO: Costruisce l'URL nel formato corretto
-        val namespace = "cs-${getRepository(pluginUrl)}"
-        val action = "vote"
-        val key = transformUrl(pluginUrl)
-        
-        val url = "$API_DOMAIN/$namespace/$action/$key"
+        val url =
+            "${API_DOMAIN}/cs-${getRepository(pluginUrl)}/vote/${transformUrl(pluginUrl)}" +
+            "?cache=false"
+
         Log.d(LOGKEY, "Requesting: $url")
-        
-        return try {
-            app.get(url).parsedSafe<Result>()?.value != null
-        } catch (e: Exception) {
-            Log.e(LOGKEY, "Failed to write vote: ${e.message}")
-            false
-        }
+
+        return app.get(url)
+            .parsedSafe<Result>()
+            ?.resolvedValue() != null
     }
 
     suspend fun getVotes(pluginUrl: String): Int =
-            votesCache[pluginUrl] ?: readVote(pluginUrl).also {
-                votesCache[pluginUrl] = it
-            }
+        votesCache[pluginUrl] ?: readVote(pluginUrl).also {
+            votesCache[pluginUrl] = it
+        }
 
-    fun hasVoted(pluginUrl: String) =
+    fun hasVoted(pluginUrl: String): Boolean =
         getKey("cs3-votes/${transformUrl(pluginUrl)}") ?: false
 
-    fun canVote(pluginUrl: String): Boolean {
-        return PluginManager.urlPlugins.contains(pluginUrl)
-    }
+    fun canVote(pluginUrl: String): Boolean =
+        PluginManager.urlPlugins.contains(pluginUrl)
 
     private val voteLock = Mutex()
+
     suspend fun vote(pluginUrl: String): Int {
-        // Prevent multiple requests at the same time.
         voteLock.withLock {
             if (!canVote(pluginUrl)) {
                 main {
-                    Toast.makeText(context, R.string.extension_install_first, Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(
+                        context,
+                        R.string.extension_install_first,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 return getVotes(pluginUrl)
             }
 
             if (hasVoted(pluginUrl)) {
                 main {
-                    Toast.makeText(context, R.string.already_voted, Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(
+                        context,
+                        R.string.already_voted,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 return getVotes(pluginUrl)
             }
-
 
             if (writeVote(pluginUrl)) {
                 setKey("cs3-votes/${transformUrl(pluginUrl)}", true)
@@ -125,7 +107,15 @@ object VotingApi { // please do not cheat the votes lol
         }
     }
 
+    /**
+     * Supporta:
+     * - API legacy → { "value": Int }
+     * - API nuova   → { "count": Int, ... }
+     */
     private data class Result(
-        val value: Int?
-    )
+        val value: Int? = null,
+        val count: Int? = null
+    ) {
+        fun resolvedValue(): Int? = value ?: count
+    }
 }
