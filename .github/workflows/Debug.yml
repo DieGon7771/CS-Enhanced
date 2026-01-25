@@ -1,16 +1,20 @@
 name: Debug APK Build (No Secrets)
 
 on:
-  workflow_dispatch:  # Solo attivazione manuale
+  workflow_dispatch:
     inputs:
-      clean_build:
-        description: 'Clean build (takes longer)'
+      build_variant:
+        description: 'Build variant'
         required: true
-        default: 'false'
-        type: boolean
+        default: 'prerelease'
+        type: choice
+        options:
+          - prerelease
+          - debug
+          - release
 
 jobs:
-  build-debug:
+  build:
     runs-on: ubuntu-latest
     
     steps:
@@ -26,27 +30,33 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x gradlew
     
-    - name: Clean build (optional)
-      if: github.event.inputs.clean_build == 'true'
-      run: ./gradlew clean
+    - name: Build APK
+      run: |
+        if [ "${{ github.event.inputs.build_variant }}" = "prerelease" ]; then
+          ./gradlew assemblePrerelease
+        elif [ "${{ github.event.inputs.build_variant }}" = "release" ]; then
+          ./gradlew assembleRelease
+        else
+          ./gradlew assembleDebug
+        fi
     
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug --no-daemon
+    - name: Find and list APK files
+      run: |
+        echo "🔍 Cercando file APK..."
+        find app/build -name "*.apk" -type f | while read file; do
+          echo "📁 Trovato: $file"
+          ls -la "$file"
+        done
+        echo ""
+        echo "📁 Struttura cartelle:"
+        find app/build/outputs -type d | sort
     
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: cloudstream-debug-apk
+        name: cloudstream-apk
         path: |
-          app/build/outputs/apk/debug/*.apk
-          app/build/outputs/mapping/debug/*/mapping.txt
+          app/build/outputs/apk/**/*.apk
+          app/build/outputs/bundle/**/*.aab
+        if-no-files-found: warn
         retention-days: 7
-        if-no-files-found: error
-    
-    - name: Show APK info
-      run: |
-        echo "✅ Build completato!"
-        echo "APK generati:"
-        find app/build/outputs/apk/debug/ -name "*.apk" -type f | while read apk; do
-          echo "  - $(basename "$apk") ($(du -h "$apk" | cut -f1))"
-        done
