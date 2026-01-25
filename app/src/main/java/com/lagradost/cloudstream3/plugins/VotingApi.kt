@@ -17,7 +17,6 @@ object VotingApi {
     private const val LOGKEY = "VotingApi"
     private const val API_DOMAIN = "https://api.countify.xyz"
 
-    // Trasforma URL plugin in ID unico
     private fun transformUrl(url: String): String =
         MessageDigest
             .getInstance("SHA-256")
@@ -31,7 +30,6 @@ object VotingApi {
 
     private val votesCache = mutableMapOf<String, Int>()
 
-    // Lettura voti da Countify
     private suspend fun readVote(pluginUrl: String): Int {
         val id = transformUrl(pluginUrl)
         val url = "$API_DOMAIN/get-total/$id"
@@ -39,7 +37,6 @@ object VotingApi {
         return app.get(url).parsedSafe<CountifyResult>()?.count ?: 0
     }
 
-    // Scrittura voto su Countify (POST con map vuota)
     private suspend fun writeVote(pluginUrl: String): Boolean {
         val id = transformUrl(pluginUrl)
         val url = "$API_DOMAIN/increment/$id"
@@ -94,7 +91,6 @@ object VotingApi {
         }
     }
 
-    // Classe per JSON Countify
     private data class CountifyResult(
         val id: String? = null,
         val count: Int? = null
