@@ -11,8 +11,6 @@ import com.lagradost.cloudstream3.app
 import com.lagradost.cloudstream3.utils.Coroutines.main
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
 
 object VotingApi {
 
@@ -41,15 +39,13 @@ object VotingApi {
         return app.get(url).parsedSafe<CountifyResult>()?.value ?: 0
     }
 
-    // Scrittura voto su Countify
+    // Scrittura voto su Countify (usa Map<String,String> vuota)
     private suspend fun writeVote(pluginUrl: String): Boolean {
         val id = transformUrl(pluginUrl)
         val url = "$API_DOMAIN/increment/$id"
         Log.d(LOGKEY, "Requesting POST: $url")
-        // Countify usa POST senza body
-        val mediaType = "application/json; charset=utf-8".toMediaType()
-        val body = "{}".toRequestBody(mediaType)
-        return app.post(url, body).parsedSafe<CountifyResult>()?.value != null
+        return app.post(url, emptyMap<String, String>())
+            .parsedSafe<CountifyResult>()?.value != null
     }
 
     suspend fun getVotes(pluginUrl: String): Int =
