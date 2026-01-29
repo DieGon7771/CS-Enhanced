@@ -925,17 +925,11 @@ class ResultFragmentTv : BaseFragment<FragmentResultTvBinding>(
                         resultTvComingSoon.isVisible = d.comingSoon
 
                         populateChips(resultTag, d.tags)
-                        val prefs = androidx.preference.PreferenceManager
-                            .getDefaultSharedPreferences(root.context)
-
-                        val showCast = prefs.getBoolean(
-                            root.context.getString(R.string.show_cast_in_details_key),
-                            true
-                        )
+                        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(root.context)
+                        val showCast = prefs.getBoolean(root.context.getString(R.string.show_cast_in_details_key), true)
 
                         resultCastItems.isGone = !showCast || d.actors.isNullOrEmpty()
-                        (resultCastItems.adapter as? ActorAdaptor)
-                            ?.submitList(if (showCast) d.actors else emptyList())
+                        (resultCastItems.adapter as? ActorAdaptor)?.submitList(if (showCast) d.actors else emptyList())
 
                         if (d.contentRatingText == null) {
                             // If there is no rating to display, we don't want an empty gap
