@@ -8,6 +8,7 @@ import com.lagradost.cloudstream3.utils.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URLDecoder
+import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 
 class YoutubeShortLinkExtractor : YoutubeExtractor() {
     override val mainUrl = "https://youtu.be"
@@ -131,7 +132,7 @@ open class YoutubeExtractor : ExtractorApi() {
             )
         }
 
-        // Streaming URL HLS
+        // Streaming HLS
         response.streamingData?.hlsManifestUrl?.let { hlsUrl ->
             val playlistText = app.get(hlsUrl, headers = HEADERS).text
             val playlist = HlsPlaylistParser.parse(hlsUrl, playlistText) ?: return
@@ -151,19 +152,19 @@ open class YoutubeExtractor : ExtractorApi() {
                     }
                 )
             }
-        } ?: run {
-            // Fallback su MP4
-            response.streamingData?.formats?.forEach { format ->
-                if (format.mimeType.startsWith("video")) {
-                    callback(
-                        newExtractorLink(
-                            source = name,
-                            name = "Youtube ${format.qualityLabel}",
-                            url = format.url,
-                            type = ExtractorLinkType.MP4
-                        ) { this.quality = format.height }
-                    )
-                }
+        }
+
+        // Fallback su MP4 se HLS non disponibile
+        response.streamingData?.formats?.forEach { format ->
+            if (format.mimeType.startsWith("video")) {
+                callback(
+                    newExtractorLink(
+                        source = name,
+                        name = "Youtube ${format.qualityLabel}",
+                        url = format.url,
+                        type = ExtractorLinkType.MP4_VIDEO
+                    ) { this.quality = format.height }
+                )
             }
         }
     }
