@@ -1,11 +1,7 @@
-// YoutubeExtractor.kt
-// Made for CloudStream / CS-Kraptor
-
 package com.lagradost.cloudstream3.extractors
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.app
 import com.lagradost.cloudstream3.utils.*
@@ -27,17 +23,16 @@ open class YoutubeExtractor : ExtractorApi() {
         )
     }
 
-    // Helper JSON parsing function
+    // Parsing JSON sicuro passando la classe
     private fun <T> parseJsonSafe(json: String?, clazz: Class<T>): T? {
         if (json.isNullOrBlank()) return null
         return try {
-            jacksonObjectMapper().readValue(json)
+            jacksonObjectMapper().readValue(json, clazz)
         } catch (e: Exception) {
             null
         }
     }
 
-    // Estrae ytcfg dal codice HTML della pagina
     private fun extractYtCfg(html: String): String? {
         val regex = Regex("""ytcfg\.set\(\s*(\{.*?\})\s*\)\s*;""")
         return regex.find(html)?.groupValues?.getOrNull(1)
@@ -58,7 +53,6 @@ open class YoutubeExtractor : ExtractorApi() {
         return parseJsonSafe(ytcfgJson, PageConfig::class.java)
     }
 
-    // Estrae l'ID del video da URL diversi
     fun extractYouTubeId(url: String): String {
         return when {
             url.contains("watch?v=") -> url.substringAfter("watch?v=").substringBefore("&").substringBefore("#")
@@ -79,7 +73,6 @@ open class YoutubeExtractor : ExtractorApi() {
         val videoId = extractYouTubeId(url)
         val config = getPageConfig(videoId) ?: return
 
-        // Corpo della richiesta al player API di YouTube
         val jsonBody = """
         {
             "context": {
@@ -104,19 +97,16 @@ open class YoutubeExtractor : ExtractorApi() {
 
         val response = app
             .post("$mainUrl/youtubei/v1/player?key=${config.apiKey}", headers = HEADERS, requestBody = jsonBody)
-            .parsed<Root>()
+            .parsed(Root::class.java) // uso classe esplicita
 
-        // Aggiunge sottotitoli
         response.captions?.playerCaptionsTracklistRenderer?.captionTracks?.forEach { caption ->
             subtitleCallback(
-                newSubtitleFile(
-                    lang = caption.name.simpleText,
-                    url = "${caption.baseUrl}&fmt=ttml"
-                ) { headers = HEADERS }
+                newSubtitleFile(caption.name.simpleText, "${caption.baseUrl}&fmt=ttml") {
+                    this.headers = HEADERS
+                }
             )
         }
 
-        // Streaming HLS
         val hlsUrl = response.streamingData.hlsManifestUrl
         val playlistText = app.get(hlsUrl, headers = HEADERS).text
         val playlist = HlsPlaylistParser.parse(hlsUrl, playlistText) ?: return
@@ -149,51 +139,20 @@ open class YoutubeExtractor : ExtractorApi() {
         }
     }
 
-    // --- Data classes per JSON ---
+    // --- Data classes JSON ---
     private data class Root(
-        @JsonProperty("streamingData")
-        val streamingData: StreamingData,
-        @JsonProperty("captions")
-        val captions: Captions?
+        @JsonProperty("streamingData") val streamingData: StreamingData,
+        @JsonProperty("captions") val captions: Captions?
     )
 
-    private data class StreamingData(
-        @JsonProperty("hlsManifestUrl")
-        val hlsManifestUrl: String
-    )
-
-    private data class Captions(
-        @JsonProperty("playerCaptionsTracklistRenderer")
-        val playerCaptionsTracklistRenderer: PlayerCaptionsTracklistRenderer?
-    )
-
-    private data class PlayerCaptionsTracklistRenderer(
-        @JsonProperty("captionTracks")
-        val captionTracks: List<CaptionTrack>?
-    )
-
-    private data class CaptionTrack(
-        @JsonProperty("baseUrl")
-        val baseUrl: String,
-        @JsonProperty("name")
-        val name: Name
-    )
-
-    private data class Name(
-        @JsonProperty("simpleText")
-        val simpleText: String
-    )
+    private data class StreamingData(@JsonProperty("hlsManifestUrl") val hlsManifestUrl: String)
+    private data class Captions(@JsonProperty("playerCaptionsTracklistRenderer") val playerCaptionsTracklistRenderer: PlayerCaptionsTracklistRenderer?)
+    private data class PlayerCaptionsTracklistRenderer(@JsonProperty("captionTracks") val captionTracks: List<CaptionTrack>?)
+    private data class CaptionTrack(@JsonProperty("baseUrl") val baseUrl: String, @JsonProperty("name") val name: Name)
+    private data class Name(@JsonProperty("simpleText") val simpleText: String)
 }
 
-// Varianti di YouTube
-class YoutubeShortLinkExtractor : YoutubeExtractor() {
-    override val mainUrl = "https://youtu.be"
-}
-
-class YoutubeMobileExtractor : YoutubeExtractor() {
-    override val mainUrl = "https://m.youtube.com"
-}
-
-class YoutubeNoCookieExtractor : YoutubeExtractor() {
-    override val mainUrl = "https://www.youtube-nocookie.com"
-}
+// Varianti
+class YoutubeShortLinkExtractor : YoutubeExtractor() { override val mainUrl = "https://youtu.be" }
+class YoutubeMobileExtractor : YoutubeExtractor() { override val mainUrl = "https://m.youtube.com" }
+class YoutubeNoCookieExtractor : YoutubeExtractor() { override val mainUrl = "https://www.youtube-nocookie.com" }
