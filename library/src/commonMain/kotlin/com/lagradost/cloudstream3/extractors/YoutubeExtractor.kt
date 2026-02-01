@@ -1,4 +1,4 @@
-// Made For CS-Kraptor By @trup40, @kraptor123, @ByAyzen
+// Made For cs-kraptor By @trup40, @kraptor123, @ByAyzen
 package com.lagradost.cloudstream3.extractors
 
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -119,11 +119,12 @@ open class YoutubeExtractor : ExtractorApi() {
         }
         """.toRequestBody("application/json; charset=utf-8".toMediaType())
 
-        val response = app.post(
-            "$youtubeUrl/youtubei/v1/player?key=${config.apiKey}",
-            headers = HEADERS,
-            requestBody = jsonBody
-        ).parsed<Root>()
+        val response =
+            app.post(
+                "$youtubeUrl/youtubei/v1/player?key=${config.apiKey}",
+                headers = HEADERS,
+                requestBody = jsonBody
+            ).parsed<Root>()
 
         // Sottotitoli
         response.captions?.playerCaptionsTracklistRenderer?.captionTracks?.forEach { caption ->
@@ -137,6 +138,8 @@ open class YoutubeExtractor : ExtractorApi() {
 
         // Streaming HLS/Web con fallback serverAbrStreamingUrl
         val hlsUrl = response.streamingData.hlsManifestUrl ?: response.streamingData.serverAbrStreamingUrl
+            ?: return // Se non esiste nulla, ritorna
+
         val playlistText = app.get(hlsUrl, headers = HEADERS).text
         val playlist = HlsPlaylistParser.parse(hlsUrl, playlistText) ?: return
 
@@ -151,7 +154,10 @@ open class YoutubeExtractor : ExtractorApi() {
                 ?.get(1)
                 ?.trim('"') ?: ""
 
-            val langString = SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore(".")) ?: audioId
+            val langString = SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore("."))
+                ?: SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore("-"))
+                ?: audioId
+
             val variantUrl = variant.url.toString()
             if (variantUrl.isBlank()) continue
 
