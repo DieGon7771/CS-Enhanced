@@ -1,11 +1,17 @@
-// Made For cs-kraptor By @trup40, @kraptor123, @ByAyzen
+// Made For CS-Kraptor By @trup40, @kraptor123, @ByAyzen
 package com.lagradost.cloudstream3.extractors
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.app
 import com.lagradost.cloudstream3.newSubtitleFile
-import com.lagradost.cloudstream3.utils.*
+import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
+import com.lagradost.cloudstream3.utils.ExtractorApi
+import com.lagradost.cloudstream3.utils.ExtractorLink
+import com.lagradost.cloudstream3.utils.ExtractorLinkType
+import com.lagradost.cloudstream3.utils.HlsPlaylistParser
+import com.lagradost.cloudstream3.utils.SubtitleHelper
+import com.lagradost.cloudstream3.utils.newExtractorLink
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URLDecoder
@@ -113,12 +119,11 @@ open class YoutubeExtractor : ExtractorApi() {
         }
         """.toRequestBody("application/json; charset=utf-8".toMediaType())
 
-        val response =
-            app.post(
-                "$youtubeUrl/youtubei/v1/player?key=${config.apiKey}",
-                headers = HEADERS,
-                requestBody = jsonBody
-            ).parsed<Root>()
+        val response = app.post(
+            "$youtubeUrl/youtubei/v1/player?key=${config.apiKey}",
+            headers = HEADERS,
+            requestBody = jsonBody
+        ).parsed<Root>()
 
         // Sottotitoli
         response.captions?.playerCaptionsTracklistRenderer?.captionTracks?.forEach { caption ->
@@ -130,48 +135,37 @@ open class YoutubeExtractor : ExtractorApi() {
             )
         }
 
-        // HLS URL (serverAbrStreamingUrl fallback)
+        // Streaming HLS/Web con fallback serverAbrStreamingUrl
         val hlsUrl = response.streamingData.hlsManifestUrl ?: response.streamingData.serverAbrStreamingUrl
-        if (!hlsUrl.isNullOrBlank()) {
-            val playlistText = app.get(hlsUrl, headers = HEADERS).text
-            val playlist = HlsPlaylistParser.parse(hlsUrl, playlistText) ?: return
+        val playlistText = app.get(hlsUrl, headers = HEADERS).text
+        val playlist = HlsPlaylistParser.parse(hlsUrl, playlistText) ?: return
 
-            playlist.variants.forEachIndexed { index, variant ->
-                val audioId = playlist.tags.getOrNull(index)
-                    ?.split(",")
-                    ?.find { it.startsWith("YT-EXT-AUDIO-CONTENT-ID=") }
-                    ?.split("=")?.getOrNull(1)
-                    ?.trim('"') ?: ""
+        var variantIndex = 0
+        for (tag in playlist.tags) {
+            if (!tag.trim().startsWith("#EXT-X-STREAM-INF")) continue
+            val variant = playlist.variants.getOrNull(variantIndex++) ?: continue
 
-                val lang = SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore("."))
-                    ?: audioId
+            val audioId = tag.split(",")
+                .find { it.trim().startsWith("YT-EXT-AUDIO-CONTENT-ID=") }
+                ?.split("=")
+                ?.get(1)
+                ?.trim('"') ?: ""
 
-                callback(
-                    newExtractorLink(
-                        source = name,
-                        name = "YouTube${if (lang.isNotBlank()) " $lang" else ""}",
-                        url = variant.url.toString(),
-                        type = ExtractorLinkType.M3U8
-                    ) {
-                        this.referer = "$mainUrl/"
-                        this.quality = variant.format.height
-                    }
-                )
-            }
-        }
+            val langString = SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore(".")) ?: audioId
+            val variantUrl = variant.url.toString()
+            if (variantUrl.isBlank()) continue
 
-        // Fallback MP4
-        response.streamingData.formats?.forEach { format ->
-            if (format.mimeType.startsWith("video")) {
-                callback(
-                    newExtractorLink(
-                        source = name,
-                        name = "YouTube ${format.qualityLabel}",
-                        url = format.url,
-                        type = ExtractorLinkType.MP4
-                    ) { this.quality = format.height }
-                )
-            }
+            callback(
+                newExtractorLink(
+                    source = name,
+                    name = "YouTube${if (langString.isNotBlank()) " $langString" else ""}",
+                    url = variantUrl,
+                    type = ExtractorLinkType.M3U8
+                ) {
+                    this.referer = "$mainUrl/"
+                    this.quality = variant.format.height
+                }
+            )
         }
     }
 
@@ -186,20 +180,7 @@ open class YoutubeExtractor : ExtractorApi() {
         @JsonProperty("hlsManifestUrl")
         val hlsManifestUrl: String?,
         @JsonProperty("serverAbrStreamingUrl")
-        val serverAbrStreamingUrl: String?,
-        @JsonProperty("formats")
-        val formats: List<Format>? = emptyList()
-    )
-
-    private data class Format(
-        @JsonProperty("url")
-        val url: String,
-        @JsonProperty("qualityLabel")
-        val qualityLabel: String = "",
-        @JsonProperty("height")
-        val height: Int = 0,
-        @JsonProperty("mimeType")
-        val mimeType: String = ""
+        val serverAbrStreamingUrl: String?
     )
 
     private data class Captions(
