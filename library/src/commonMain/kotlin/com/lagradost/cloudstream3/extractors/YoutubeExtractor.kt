@@ -1,6 +1,7 @@
 // Made For cs-kraptor By @trup40, @kraptor123, @ByAyzen
 package com.lagradost.cloudstream3.extractors
 
+import android.util.Log
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.app
@@ -29,12 +30,9 @@ class YoutubeNoCookieExtractor : YoutubeExtractor() {
 }
 
 open class YoutubeExtractor : ExtractorApi() {
-    override val mainUrl = "https://www.youtube.com"
-    override val requiresReferer = false
-    override val name = "YouTube"
-    private val youtubeUrl = "https://www.youtube.com"
 
     companion object {
+        private const val TAG = "YT-EXTRACTOR"
         private const val USER_AGENT =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15"
         private val HEADERS = mapOf(
@@ -43,9 +41,16 @@ open class YoutubeExtractor : ExtractorApi() {
         )
     }
 
+    override val mainUrl = "https://www.youtube.com"
+    override val requiresReferer = false
+    override val name = "YouTube"
+    private val youtubeUrl = "https://www.youtube.com"
+
     private fun extractYtCfg(html: String): String? {
+        Log.d(TAG, "extractYtCfg: html length=${html.length}")
         val regex = Regex("""ytcfg\.set\(\s*(\{.*?\})\s*\)\s*;""")
         val match = regex.find(html)
+        Log.d(TAG, "extractYtCfg: found=${match != null}")
         return match?.groupValues?.getOrNull(1)
     }
 
@@ -58,20 +63,24 @@ open class YoutubeExtractor : ExtractorApi() {
         val visitorData: String = ""
     )
 
-    private suspend fun getPageConfig(videoId: String): PageConfig? =
-        tryParseJson(extractYtCfg(app.get("$mainUrl/watch?v=$videoId", headers = HEADERS).text))
+    private suspend fun getPageConfig(videoId: String): PageConfig? {
+        Log.d(TAG, "getPageConfig: videoId=$videoId")
+        val html = app.get("$mainUrl/watch?v=$videoId", headers = HEADERS).text
+        val cfg = extractYtCfg(html)
+        Log.d(TAG, "getPageConfig: cfg null=${cfg == null}")
+        return tryParseJson(cfg)
+    }
 
     fun extractYouTubeId(url: String): String {
-        return when {
+        Log.d(TAG, "extractYouTubeId: input=$url")
+        val id = when {
             url.contains("oembed") && url.contains("url=") -> {
                 val encodedUrl = url.substringAfter("url=").substringBefore("&")
-                val decodedUrl = URLDecoder.decode(encodedUrl, "UTF-8")
-                extractYouTubeId(decodedUrl)
+                extractYouTubeId(URLDecoder.decode(encodedUrl, "UTF-8"))
             }
             url.contains("attribution_link") && url.contains("u=") -> {
                 val encodedUrl = url.substringAfter("u=").substringBefore("&")
-                val decodedUrl = URLDecoder.decode(encodedUrl, "UTF-8")
-                extractYouTubeId(decodedUrl)
+                extractYouTubeId(URLDecoder.decode(encodedUrl, "UTF-8"))
             }
             url.contains("watch?v=") -> url.substringAfter("watch?v=").substringBefore("&").substringBefore("#")
             url.contains("&v=") -> url.substringAfter("&v=").substringBefore("&").substringBefore("#")
@@ -86,6 +95,8 @@ open class YoutubeExtractor : ExtractorApi() {
             url.contains("v%3D") -> url.substringAfter("v%3D").substringBefore("%26").substringBefore("#")
             else -> error("No Id Found")
         }
+        Log.d(TAG, "extractYouTubeId: result=$id")
+        return id
     }
 
     override suspend fun getUrl(
@@ -94,8 +105,17 @@ open class YoutubeExtractor : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        Log.d(TAG, "getUrl START url=$url")
+
         val videoId = extractYouTubeId(url)
-        val config = getPageConfig(videoId) ?: return
+        val config = getPageConfig(videoId)
+
+        if (config == null) {
+            Log.e(TAG, "getUrl: PageConfig NULL")
+            return
+        }
+
+        Log.d(TAG, "getUrl: apiKey=${config.apiKey.take(8)}...")
 
         val jsonBody = """
         {
@@ -119,60 +139,83 @@ open class YoutubeExtractor : ExtractorApi() {
         }
         """.toRequestBody("application/json; charset=utf-8".toMediaType())
 
-        val response =
-            app.post(
-                "$youtubeUrl/youtubei/v1/player?key=${config.apiKey}",
-                headers = HEADERS,
-                requestBody = jsonBody
-            ).parsed<Root>()
+        Log.d(TAG, "POST /youtubei/v1/player")
 
-        // Sottotitoli
-        response.captions?.playerCaptionsTracklistRenderer?.captionTracks?.forEach { caption ->
-            subtitleCallback(
+        val response = app.post(
+            "$youtubeUrl/youtubei/v1/player?key=${config.apiKey}",
+            headers = HEADERS,
+            requestBody = jsonBody
+        ).parsed<Root>()
+
+        Log.d(TAG, "player response OK")
+
+        val captionTracks = response.captions?.playerCaptionsTracklistRenderer?.captionTracks
+        Log.d(TAG, "captions count=${captionTracks?.size ?: 0}")
+
+        captionTracks?.forEach {
+            subtitleCallback.invoke(
                 newSubtitleFile(
-                    lang = caption.name.simpleText,
-                    url = "${caption.baseUrl}&fmt=ttml"
+                    lang = it.name.simpleText,
+                    url = "${it.baseUrl}&fmt=ttml"
                 ) { headers = HEADERS }
             )
         }
 
-        // Streaming HLS/Web con fallback serverAbrStreamingUrl
-        val hlsUrl = response.streamingData.hlsManifestUrl ?: response.streamingData.serverAbrStreamingUrl
-            ?: return // Se non esiste nulla, ritorna
+        val hlsUrl = response.streamingData.hlsManifestUrl
+        Log.d(TAG, "hlsManifestUrl=${hlsUrl.take(120)}")
 
-        val playlistText = app.get(hlsUrl, headers = HEADERS).text
-        val playlist = HlsPlaylistParser.parse(hlsUrl, playlistText) ?: return
+        val getHls = app.get(hlsUrl, headers = HEADERS).text
+        Log.d(TAG, "HLS playlist length=${getHls.length}")
+
+        val playlist = HlsPlaylistParser.parse(hlsUrl, getHls)
+        if (playlist == null) {
+            Log.e(TAG, "HLS PARSE FAILED")
+            return
+        }
+
+        Log.d(TAG, "playlist tags=${playlist.tags.size} variants=${playlist.variants.size}")
 
         var variantIndex = 0
         for (tag in playlist.tags) {
-            if (!tag.trim().startsWith("#EXT-X-STREAM-INF")) continue
-            val variant = playlist.variants.getOrNull(variantIndex++) ?: continue
+            val trimmedTag = tag.trim()
+            if (!trimmedTag.startsWith("#EXT-X-STREAM-INF")) continue
 
-            val audioId = tag.split(",")
+            val variant = playlist.variants.getOrNull(variantIndex++)
+            if (variant == null) {
+                Log.e(TAG, "variant NULL at index=$variantIndex")
+                continue
+            }
+
+            val audioId = trimmedTag.split(",")
                 .find { it.trim().startsWith("YT-EXT-AUDIO-CONTENT-ID=") }
                 ?.split("=")
                 ?.get(1)
                 ?.trim('"') ?: ""
 
-            val langString = SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore("."))
-                ?: SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore("-"))
-                ?: audioId
+            val langString =
+                SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore("."))
+                    ?: SubtitleHelper.fromTagToEnglishLanguageName(audioId.substringBefore("-"))
+                    ?: audioId
 
-            val variantUrl = variant.url.toString()
-            if (variantUrl.isBlank()) continue
+            val streamUrl = variant.url.toString()
+            Log.d(TAG, "variant url=${streamUrl.take(120)} quality=${variant.format.height}")
 
-            callback(
+            if (streamUrl.isBlank()) continue
+
+            callback.invoke(
                 newExtractorLink(
                     source = name,
-                    name = "YouTube${if (langString.isNotBlank()) " $langString" else ""}",
-                    url = variantUrl,
+                    name = "Youtube${if (langString.isNotBlank()) " $langString" else ""}",
+                    url = streamUrl,
                     type = ExtractorLinkType.M3U8
                 ) {
-                    this.referer = "$mainUrl/"
-                    this.quality = variant.format.height
+                    referer = "$mainUrl/"
+                    quality = variant.format.height
                 }
             )
         }
+
+        Log.d(TAG, "getUrl END")
     }
 
     private data class Root(
@@ -184,9 +227,7 @@ open class YoutubeExtractor : ExtractorApi() {
 
     private data class StreamingData(
         @JsonProperty("hlsManifestUrl")
-        val hlsManifestUrl: String?,
-        @JsonProperty("serverAbrStreamingUrl")
-        val serverAbrStreamingUrl: String?
+        val hlsManifestUrl: String
     )
 
     private data class Captions(
