@@ -178,9 +178,12 @@ open class YoutubeExtractor : ExtractorApi() {
             val trimmedTag = tag.trim()
             if (!trimmedTag.startsWith("#EXT-X-STREAM-INF")) continue
 
-            val variant = playlist.variants.getOrNull(variantIndex++)
+            val currentIndex = variantIndex
+            variantIndex++
+            
+            val variant = playlist.variants.getOrNull(currentIndex)
             if (variant == null) {
-                Log.e(TAG, "variant NULL at index=$variantIndex")
+                Log.e(TAG, "variant NULL at index=$currentIndex")
                 continue
             }
 
