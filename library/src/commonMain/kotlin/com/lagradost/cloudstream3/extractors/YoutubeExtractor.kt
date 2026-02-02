@@ -1,7 +1,7 @@
 // Made For cs-kraptor By @trup40, @kraptor123, @ByAyzen
 package com.lagradost.cloudstream3.extractors
 
-import android.util.Log
+import com.lagradost.api.Log
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.app
@@ -73,7 +73,7 @@ open class YoutubeExtractor : ExtractorApi() {
 
     fun extractYouTubeId(url: String): String {
         Log.d(TAG, "extractYouTubeId: input=$url")
-        val id = when {
+        return when {
             url.contains("oembed") && url.contains("url=") -> {
                 val encodedUrl = url.substringAfter("url=").substringBefore("&")
                 extractYouTubeId(URLDecoder.decode(encodedUrl, "UTF-8"))
@@ -95,8 +95,6 @@ open class YoutubeExtractor : ExtractorApi() {
             url.contains("v%3D") -> url.substringAfter("v%3D").substringBefore("%26").substringBefore("#")
             else -> error("No Id Found")
         }
-        Log.d(TAG, "extractYouTubeId: result=$id")
-        return id
     }
 
     override suspend fun getUrl(
