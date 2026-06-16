@@ -1,7 +1,6 @@
 package com.lagradost.cloudstream3.ui.result
 
-import android.app.SearchManager
-import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +16,11 @@ import com.lagradost.cloudstream3.ui.NoStateAdapter
 import com.lagradost.cloudstream3.ui.ViewHolderState
 import com.lagradost.cloudstream3.ui.settings.Globals.PHONE
 import com.lagradost.cloudstream3.ui.settings.Globals.isLayout
-import com.lagradost.cloudstream3.ui.actor.ActorBottomSheet
 import com.lagradost.cloudstream3.utils.ImageLoader.loadImage
 import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
 import com.lagradost.cloudstream3.utils.Coroutines.main
 import com.lagradost.cloudstream3.mvvm.logError
+import com.lagradost.cloudstream3.utils.UIHelper.navigate
 import org.json.JSONObject
 
 class ActorAdaptor(
@@ -116,25 +115,17 @@ class ActorAdaptor(
                         val actorName = item.actor.name
                         val actorImage = item.actor.image
                         
-                        // Cerca l'ID su TMDB usando il nome
                         searchActorOnTmdb(actorName) { actorId ->
                             if (actorId != null) {
-                                val bottomSheet = ActorBottomSheet.newInstance(
-                                    actorId,
-                                    actorName,
-                                    actorImage
-                                )
                                 val activity = (itemView.context as? androidx.fragment.app.FragmentActivity)
-                                activity?.let {
-                                    bottomSheet.show(it.supportFragmentManager, "ActorBottomSheet")
-                                }
-                            } else {
-                                // Fallback a Google search se non trovato
-                                Intent(Intent.ACTION_WEB_SEARCH).apply {
-                                    putExtra(SearchManager.QUERY, actorName)
-                                }.also { intent ->
-                                    itemView.context.startActivity(intent)
-                                }
+                                activity.navigate(
+                                    R.id.global_to_navigation_actor_detail,
+                                    Bundle().apply {
+                                        putInt("actor_id", actorId)
+                                        putString("actor_name", actorName)
+                                        putString("actor_image", actorImage)
+                                    }
+                                )
                             }
                         }
                     }

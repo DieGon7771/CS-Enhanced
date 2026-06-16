@@ -786,16 +786,7 @@
     <string name="actor_loading">Loading biography...</string>
     <string name="actor_no_biography">No biography available</string>
     <string name="actor_error">Error loading actor details</string>
-    <string name="actor_search_web">Search on web</string>
-
-	<!-- Actor Filmography -->
-	<string name="actor_filter">Filter</string>
     <string name="actor_filmography">Filmography</string>
-    <string name="actor_all">All</string>
-    <string name="actor_movies">Movies</string>
-    <string name="actor_tv_shows">TV Shows</string>
-    <string name="actor_sort_by">Sort by</string>
-    <string name="actor_popularity">Popularity</string>
     <string name="actor_latest">Latest</string>
     <string name="actor_upcoming">Upcoming</string>
     <string name="actor_as_character">as %s</string>
@@ -803,9 +794,8 @@
     <string name="actor_upcoming_badge">UPCOMING</string>
     <string name="actor_loading_filmography">Loading filmography...</string>
     <string name="actor_no_content">No content found</string>
-    <string name="actor_no_movies">No movies found</string>
-    <string name="actor_no_tv">No TV shows found</string>
     <string name="actor_no_upcoming">No upcoming content</string>
+    <string name="actor_popular">Popular</string>
 
     <plurals name="downloads_active">
         <item quantity="one">%d active download</item>
