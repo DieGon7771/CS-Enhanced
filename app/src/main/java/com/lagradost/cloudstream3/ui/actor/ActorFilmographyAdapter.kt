@@ -58,7 +58,7 @@ class ActorFilmographyAdapter(
             binding.yearText.text = year
             binding.yearText.visibility = if (year != null) View.VISIBLE else View.GONE
 
-            binding.root.setOnClickListener {
+            binding.posterCard.setOnClickListener {
                 onItemClick(item)
             }
         }

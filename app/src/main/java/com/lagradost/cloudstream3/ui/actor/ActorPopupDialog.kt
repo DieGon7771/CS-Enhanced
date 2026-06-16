@@ -3,6 +3,7 @@ package com.lagradost.cloudstream3.ui.actor
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import com.lagradost.cloudstream3.R
 import com.lagradost.cloudstream3.app
@@ -25,6 +26,16 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
     private var actorId: Int = 0
     private lateinit var actorName: String
     private var actorImageUrl: String? = null
+
+    override fun getTheme(): Int = R.style.DialogHalfFullscreen
+
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.92).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
 
     override fun fixLayout(view: View) {
         fixSystemBarsPadding(view, padBottom = false)
