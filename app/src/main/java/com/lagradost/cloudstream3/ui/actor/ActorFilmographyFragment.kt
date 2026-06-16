@@ -6,20 +6,22 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.lagradost.cloudstream3.R
 import com.lagradost.cloudstream3.app
-import com.lagradost.cloudstream3.databinding.FragmentActorDetailBinding
+import com.lagradost.cloudstream3.databinding.FragmentActorFilmographyBinding
 import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.ui.BaseFragment
 import com.lagradost.cloudstream3.ui.quicksearch.QuickSearchFragment
 import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
 import com.lagradost.cloudstream3.utils.Coroutines.main
 import com.lagradost.cloudstream3.utils.ImageLoader.loadImage
+import com.lagradost.cloudstream3.utils.UIHelper.fixSystemBarsPadding
+import kotlinx.coroutines.Job
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ActorDetailFragment : BaseFragment<FragmentActorDetailBinding>(
-    BaseFragment.BindingCreator.Inflate(FragmentActorDetailBinding::inflate)
+class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
+    BaseFragment.BindingCreator.Inflate(FragmentActorFilmographyBinding::inflate)
 ) {
     private var actorId: Int = 0
     private lateinit var actorName: String
@@ -32,13 +34,17 @@ class ActorDetailFragment : BaseFragment<FragmentActorDetailBinding>(
     private val latestAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
     private val upcomingAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
 
+    private var loadJob: Job? = null
+
     companion object {
         private const val TMDB_API_KEY = "e6333b32409e02a4a6eba6fb7ff866bb"
     }
 
-    override fun fixLayout(view: View) = Unit
+    override fun fixLayout(view: View) {
+        fixSystemBarsPadding(view)
+    }
 
-    override fun onBindingCreated(binding: FragmentActorDetailBinding) {
+    override fun onBindingCreated(binding: FragmentActorFilmographyBinding) {
         actorId = arguments?.getInt("actor_id") ?: 0
         actorName = arguments?.getString("actor_name") ?: ""
         actorImageUrl = arguments?.getString("actor_image")
@@ -50,11 +56,10 @@ class ActorDetailFragment : BaseFragment<FragmentActorDetailBinding>(
 
         setupViews(binding)
         setupRecyclerViews(binding)
-        setupScrollListener(binding)
-        loadData(binding)
+        loadFilmography(binding)
     }
 
-    private fun setupViews(binding: FragmentActorDetailBinding) {
+    private fun setupViews(binding: FragmentActorFilmographyBinding) {
         binding.actorName.text = actorName
         if (!actorImageUrl.isNullOrEmpty()) {
             binding.actorImage.loadImage(actorImageUrl)
@@ -64,7 +69,7 @@ class ActorDetailFragment : BaseFragment<FragmentActorDetailBinding>(
         }
     }
 
-    private fun setupRecyclerViews(binding: FragmentActorDetailBinding) {
+    private fun setupRecyclerViews(binding: FragmentActorFilmographyBinding) {
         binding.popularRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
             requireContext(), androidx.recyclerview.widget.RecyclerView.HORIZONTAL, false
         )
@@ -81,32 +86,13 @@ class ActorDetailFragment : BaseFragment<FragmentActorDetailBinding>(
         binding.upcomingRecycler.adapter = upcomingAdapter
     }
 
-    private fun setupScrollListener(binding: FragmentActorDetailBinding) {
-        binding.nestedScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            val avatar = binding.actorImage
-            val threshold = 100
-            val shrink = (scrollY.toFloat() / threshold).coerceAtMost(1f)
-            val newSize = (120 - (56 * shrink)).toInt()
-
-            val layoutParams = avatar.layoutParams
-            if (layoutParams.width != newSize) {
-                layoutParams.width = newSize
-                layoutParams.height = newSize
-                avatar.layoutParams = layoutParams
-            }
-        }
-    }
-
-    private fun loadData(binding: FragmentActorDetailBinding) {
+    private fun loadFilmography(binding: FragmentActorFilmographyBinding) {
         binding.loadingIndicator.visibility = View.VISIBLE
 
-        ioSafe {
+        loadJob = ioSafe {
             try {
                 val language = getTmdbLanguageCode()
-                val personJson = fetchPersonDetails(language)
                 val creditsJson = fetchCombinedCredits(language)
-
-                main { bindPersonDetails(binding, personJson) }
 
                 processCredits(creditsJson)
 
@@ -118,64 +104,12 @@ class ActorDetailFragment : BaseFragment<FragmentActorDetailBinding>(
         }
     }
 
-    private suspend fun fetchPersonDetails(language: String): JSONObject {
-        val response = app.get(
-            "https://api.themoviedb.org/3/person/$actorId",
-            params = mapOf("api_key" to TMDB_API_KEY, "language" to language)
-        )
-        return JSONObject(response.text)
-    }
-
     private suspend fun fetchCombinedCredits(language: String): JSONArray {
         val response = app.get(
             "https://api.themoviedb.org/3/person/$actorId/combined_credits",
             params = mapOf("api_key" to TMDB_API_KEY, "language" to language)
         )
         return JSONObject(response.text).optJSONArray("cast") ?: JSONArray()
-    }
-
-    private fun bindPersonDetails(binding: FragmentActorDetailBinding, json: JSONObject) {
-        val birthday = json.optString("birthday", null)
-        val deathday = json.optString("deathday", null)
-        val placeOfBirth = json.optString("place_of_birth", null)
-        val gender = json.optInt("gender", 0)
-        val biography = json.optString("biography", "")
-        val knownForDepartment = json.optString("known_for_department", "")
-
-        binding.actorDepartment.text = knownForDepartment
-        binding.actorGender.text = when (gender) {
-            1 -> getString(R.string.actor_female)
-            2 -> getString(R.string.actor_male)
-            else -> getString(R.string.actor_not_specified)
-        }
-
-        if (!birthday.isNullOrEmpty()) {
-            binding.actorBirthday.text = formatDate(birthday)
-
-            if (!deathday.isNullOrEmpty() && deathday != "null") {
-                binding.actorDeathday.text = formatDate(deathday)
-                binding.deathLayout.visibility = View.VISIBLE
-                binding.actorAge.text = "${calculateAge(birthday, deathday)} ${getString(R.string.actor_years_old)}"
-            } else {
-                binding.deathLayout.visibility = View.GONE
-                binding.actorAge.text = "${calculateAge(birthday, null)} ${getString(R.string.actor_years_old)}"
-            }
-        } else {
-            binding.actorBirthday.visibility = View.GONE
-            binding.deathLayout.visibility = View.GONE
-        }
-
-        binding.actorBirthplace.text = if (!placeOfBirth.isNullOrEmpty() && placeOfBirth != "null") {
-            placeOfBirth
-        } else {
-            getString(R.string.actor_unknown)
-        }
-
-        binding.actorBio.text = if (biography.isNotEmpty()) {
-            biography
-        } else {
-            getString(R.string.actor_no_biography)
-        }
     }
 
     private fun processCredits(cast: JSONArray) {
@@ -218,7 +152,7 @@ class ActorDetailFragment : BaseFragment<FragmentActorDetailBinding>(
         return false
     }
 
-    private fun bindFilmography(binding: FragmentActorDetailBinding) {
+    private fun bindFilmography(binding: FragmentActorFilmographyBinding) {
         binding.loadingIndicator.visibility = View.GONE
 
         if (filmographyList.isEmpty()) {
@@ -262,45 +196,17 @@ class ActorDetailFragment : BaseFragment<FragmentActorDetailBinding>(
         QuickSearchFragment.pushSearch(requireActivity(), item.title)
     }
 
-    private fun showError(binding: FragmentActorDetailBinding) {
+    private fun showError(binding: FragmentActorFilmographyBinding) {
         binding.loadingIndicator.visibility = View.GONE
-        binding.actorBio.text = getString(R.string.actor_error)
-    }
-
-    private fun formatDate(dateString: String): String {
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-            val outputFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
-            val date = inputFormat.parse(dateString)
-            outputFormat.format(date)
-        } catch (e: Exception) {
-            dateString
-        }
-    }
-
-    private fun calculateAge(birthday: String, deathday: String?): Int {
-        return try {
-            val format = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-            val birthDate = format.parse(birthday) ?: return 0
-            val endDate = if (!deathday.isNullOrEmpty() && deathday != "null") {
-                format.parse(deathday) ?: Date()
-            } else {
-                Date()
-            }
-            val birthCalendar = Calendar.getInstance().apply { time = birthDate }
-            val endCalendar = Calendar.getInstance().apply { time = endDate }
-            var age = endCalendar.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR)
-            if (endCalendar.get(Calendar.DAY_OF_YEAR) < birthCalendar.get(Calendar.DAY_OF_YEAR)) {
-                age--
-            }
-            age
-        } catch (e: Exception) {
-            0
-        }
     }
 
     private fun getTmdbLanguageCode(): String {
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext())
         return prefs.getString("locale_key", "en-US") ?: "en-US"
+    }
+
+    override fun onDestroyView() {
+        loadJob?.cancel()
+        super.onDestroyView()
     }
 }

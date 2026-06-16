@@ -1,6 +1,5 @@
 package com.lagradost.cloudstream3.ui.result
 
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,13 +13,13 @@ import com.lagradost.cloudstream3.databinding.CastItemBinding
 import com.lagradost.cloudstream3.ui.BaseDiffCallback
 import com.lagradost.cloudstream3.ui.NoStateAdapter
 import com.lagradost.cloudstream3.ui.ViewHolderState
+import com.lagradost.cloudstream3.ui.actor.ActorPopupDialog
 import com.lagradost.cloudstream3.ui.settings.Globals.PHONE
 import com.lagradost.cloudstream3.ui.settings.Globals.isLayout
 import com.lagradost.cloudstream3.utils.ImageLoader.loadImage
 import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
 import com.lagradost.cloudstream3.utils.Coroutines.main
 import com.lagradost.cloudstream3.mvvm.logError
-import com.lagradost.cloudstream3.utils.UIHelper.navigate
 import org.json.JSONObject
 
 class ActorAdaptor(
@@ -118,14 +117,10 @@ class ActorAdaptor(
                         searchActorOnTmdb(actorName) { actorId ->
                             if (actorId != null) {
                                 val activity = (itemView.context as? androidx.fragment.app.FragmentActivity)
-                                activity.navigate(
-                                    R.id.global_to_navigation_actor_detail,
-                                    Bundle().apply {
-                                        putInt("actor_id", actorId)
-                                        putString("actor_name", actorName)
-                                        putString("actor_image", actorImage)
-                                    }
-                                )
+                                activity?.let {
+                                    val dialog = ActorPopupDialog.newInstance(actorId, actorName, actorImage)
+                                    dialog.show(it.supportFragmentManager, "ActorPopup")
+                                }
                             }
                         }
                     }

@@ -786,6 +786,7 @@
     <string name="actor_loading">Loading biography...</string>
     <string name="actor_no_biography">No biography available</string>
     <string name="actor_error">Error loading actor details</string>
+    <string name="actor_search_web">Search on web</string>
     <string name="actor_filmography">Filmography</string>
     <string name="actor_latest">Latest</string>
     <string name="actor_upcoming">Upcoming</string>

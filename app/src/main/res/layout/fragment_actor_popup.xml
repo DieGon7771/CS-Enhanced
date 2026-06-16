@@ -1,37 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="?attr/primaryBlackBackground">
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
         android:scrollbars="vertical"
-        android:fadeScrollbars="false"
-        android:fillViewport="true">
+        android:fadeScrollbars="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Hero Section -->
             <LinearLayout
-                android:id="@+id/heroSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="20dp"
-                android:paddingTop="48dp"
                 android:gravity="center_vertical">
 
                 <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/actorImage"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
+                    android:id="@+id/actor_image"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/roundedImageView"
                     android:src="@drawable/ic_baseline_person_24"
@@ -45,10 +43,10 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/actorName"
+                        android:id="@+id/actor_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="24sp"
+                        android:textSize="22sp"
                         android:textStyle="bold"
                         android:textColor="?attr/textColor"
                         android:fontFamily="@font/google_sans"
@@ -56,7 +54,7 @@
                         android:ellipsize="end" />
 
                     <TextView
-                        android:id="@+id/actorDepartment"
+                        android:id="@+id/actor_department"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="14sp"
@@ -68,7 +66,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="6dp"
                         android:baselineAligned="false">
 
                         <TextView
@@ -81,7 +79,7 @@
                             android:fontFamily="@font/google_sans" />
 
                         <TextView
-                            android:id="@+id/actorBirthday"
+                            android:id="@+id/actor_birthday"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
@@ -91,7 +89,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/deathLayout"
+                        android:id="@+id/death_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -108,7 +106,7 @@
                             android:fontFamily="@font/google_sans" />
 
                         <TextView
-                            android:id="@+id/actorDeathday"
+                            android:id="@+id/actor_deathday"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
@@ -133,7 +131,7 @@
                             android:fontFamily="@font/google_sans" />
 
                         <TextView
-                            android:id="@+id/actorAge"
+                            android:id="@+id/actor_age"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
@@ -159,7 +157,7 @@
                             android:fontFamily="@font/google_sans" />
 
                         <TextView
-                            android:id="@+id/actorGender"
+                            android:id="@+id/actor_gender"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
@@ -185,7 +183,7 @@
                             android:fontFamily="@font/google_sans" />
 
                         <TextView
-                            android:id="@+id/actorBirthplace"
+                            android:id="@+id/actor_birthplace"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
@@ -197,187 +195,68 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Divider -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider"
                 android:layout_marginHorizontal="20dp" />
 
-            <!-- Biography Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:text="@string/actor_biography"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="?attr/textColor"
+                android:fontFamily="@font/google_sans"
                 android:paddingHorizontal="20dp"
                 android:paddingTop="16dp"
-                android:paddingBottom="8dp">
+                android:paddingBottom="8dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/actor_biography"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/textColor"
-                    android:fontFamily="@font/google_sans" />
+            <TextView
+                android:id="@+id/actor_bio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:lineSpacingExtra="2dp"
+                android:textColor="?attr/grayTextColor"
+                android:fontFamily="@font/google_sans"
+                android:maxLines="6"
+                android:paddingHorizontal="20dp"
+                android:paddingBottom="12dp" />
 
-                <TextView
-                    android:id="@+id/actorBio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:lineSpacingExtra="2dp"
-                    android:textColor="?attr/grayTextColor"
-                    android:fontFamily="@font/google_sans"
-                    android:maxLines="8"
-                    android:layout_marginTop="8dp" />
-
-            </LinearLayout>
-
-            <!-- Loading indicator -->
             <ProgressBar
-                android:id="@+id/loadingIndicator"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:id="@+id/loading_indicator"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:layout_gravity="center"
-                android:layout_margin="24dp"
+                android:layout_margin="16dp"
                 android:visibility="gone" />
-
-            <!-- Popular Rail -->
-            <LinearLayout
-                android:id="@+id/popularSection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/actor_popular"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/textColor"
-                    android:fontFamily="@font/google_sans"
-                    android:paddingHorizontal="20dp"
-                    android:paddingBottom="8dp" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/popularRecycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:nestedScrollingEnabled="false"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
-
-            </LinearLayout>
-
-            <!-- Latest Rail -->
-            <LinearLayout
-                android:id="@+id/latestSection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/actor_latest"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/textColor"
-                    android:fontFamily="@font/google_sans"
-                    android:paddingHorizontal="20dp"
-                    android:paddingBottom="8dp" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/latestRecycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:nestedScrollingEnabled="false"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
-
-            </LinearLayout>
-
-            <!-- Upcoming Rail -->
-            <LinearLayout
-                android:id="@+id/upcomingSection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/actor_upcoming"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/textColor"
-                    android:fontFamily="@font/google_sans"
-                    android:paddingHorizontal="20dp"
-                    android:paddingBottom="8dp" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/upcomingRecycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:nestedScrollingEnabled="false"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
-
-            </LinearLayout>
-
-            <!-- Empty state -->
-            <LinearLayout
-                android:id="@+id/emptyState"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="48dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/actor_no_content"
-                    android:textSize="16sp"
-                    android:textColor="?attr/grayTextColor"
-                    android:fontFamily="@font/google_sans" />
-
-            </LinearLayout>
-
-            <!-- Bottom spacer for scrolling -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="32dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Back button overlay -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/backButton"
+    <Button
+        android:id="@+id/filmography_button"
         style="@style/BlackButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="12dp"
-        android:padding="12dp"
-        app:icon="@drawable/ic_baseline_arrow_back_24"
-        app:iconGravity="textStart"
-        app:iconSize="24dp"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:layout_gravity="top|start" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="4dp"
+        android:text="@string/actor_filmography"
+        android:fontFamily="@font/google_sans"
+        android:drawableStart="@drawable/ic_baseline_search_24"
+        android:drawablePadding="8dp" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/search_web_button"
+        style="@style/BlackButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/actor_search_web"
+        android:fontFamily="@font/google_sans" />
+
+</LinearLayout>
