@@ -2,9 +2,10 @@ package com.lagradost.cloudstream3.ui.actor
 
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.lagradost.cloudstream3.R
@@ -16,6 +17,7 @@ import com.lagradost.cloudstream3.ui.quicksearch.QuickSearchFragment
 import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
 import com.lagradost.cloudstream3.utils.Coroutines.main
 import com.lagradost.cloudstream3.utils.ImageLoader.loadImage
+import com.lagradost.cloudstream3.utils.UIHelper.fixPaddingStatusbarMargin
 import com.lagradost.cloudstream3.utils.UIHelper.fixSystemBarsPadding
 import kotlinx.coroutines.Job
 import org.json.JSONArray
@@ -44,10 +46,12 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     }
 
     override fun fixLayout(view: View) {
-        fixSystemBarsPadding(view)
+        fixSystemBarsPadding(view, padTop = false)
+        fixPaddingStatusbarMargin(binding.backButton)
     }
 
     override fun onBindingCreated(binding: FragmentActorFilmographyBinding) {
+        setupTransparentStatusBar()
         setupGradient(binding)
 
         actorId = arguments?.getInt("actor_id") ?: 0
@@ -62,6 +66,18 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         setupViews(binding)
         setupRecyclerViews(binding)
         loadFilmography(binding)
+    }
+
+    private fun setupTransparentStatusBar() {
+        val activity = activity ?: return
+        val window = activity.window ?: return
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            window.statusBarColor = Color.TRANSPARENT
+        }
     }
 
     private fun setupViews(binding: FragmentActorFilmographyBinding) {
@@ -92,7 +108,9 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     }
 
     private fun loadFilmography(binding: FragmentActorFilmographyBinding) {
-        binding.loadingIndicator.visibility = View.VISIBLE
+        binding.loadingIndicator.visibility = View.GONE
+        binding.shimmerLayout.visibility = View.VISIBLE
+        binding.shimmerLayout.startShimmer()
 
         loadJob = ioSafe {
             try {
@@ -140,7 +158,8 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
                         title = title,
                         posterPath = item.optString("poster_path", null),
                         releaseDate = releaseDateStr,
-                        mediaType = mediaType
+                        mediaType = mediaType,
+                        popularity = item.optDouble("popularity", 0.0)
                     )
                 )
             } catch (e: Exception) {
@@ -158,7 +177,8 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     }
 
     private fun bindFilmography(binding: FragmentActorFilmographyBinding) {
-        binding.loadingIndicator.visibility = View.GONE
+        binding.shimmerLayout.visibility = View.GONE
+        binding.shimmerLayout.stopShimmer()
 
         if (filmographyList.isEmpty()) {
             binding.emptyState.visibility = View.VISIBLE
@@ -169,7 +189,8 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
 
         val popular = filmographyList
             .filterNot { it.releaseDate.orEmpty() > todayStr }
-            .sortedByDescending { it.releaseDate.orEmpty() }
+            .sortedByDescending { it.popularity }
+            .take(30)
 
         val latest = filmographyList
             .filter { !it.releaseDate.orEmpty().isNullOrEmpty() && it.releaseDate.orEmpty() <= todayStr }
@@ -202,7 +223,8 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     }
 
     private fun showError(binding: FragmentActorFilmographyBinding) {
-        binding.loadingIndicator.visibility = View.GONE
+        binding.shimmerLayout.visibility = View.GONE
+        binding.shimmerLayout.stopShimmer()
     }
 
     private fun getTmdbLanguageCode(): String {

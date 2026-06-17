@@ -57,7 +57,9 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
 
     private fun setupViews(binding: FragmentActorPopupBinding) {
         binding.contentContainer.visibility = View.GONE
-        binding.loadingIndicator.visibility = View.VISIBLE
+        binding.loadingIndicator.visibility = View.GONE
+        binding.shimmerLayout.visibility = View.VISIBLE
+        binding.shimmerLayout.startShimmer()
 
         binding.filmographyButton.setOnClickListener {
             val activity = activity
@@ -127,7 +129,8 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
             } catch (e: Exception) {
                 logError(e)
                 main {
-                    binding.loadingIndicator.visibility = View.GONE
+                    binding.shimmerLayout.visibility = View.GONE
+                    binding.shimmerLayout.stopShimmer()
                 }
             }
         }
@@ -187,7 +190,8 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
     }
 
     private fun bindWikidataDetails(binding: FragmentActorPopupBinding, json: JSONObject, qid: String, lang: String, resolvedLabels: Map<String, String>) {
-        binding.loadingIndicator.visibility = View.GONE
+        binding.shimmerLayout.visibility = View.GONE
+        binding.shimmerLayout.stopShimmer()
         binding.contentContainer.visibility = View.VISIBLE
 
         val entities = json.getJSONObject("entities").getJSONObject(qid)
@@ -322,20 +326,19 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
                 binding.rowBirthplace.visibility = View.GONE
             }
 
-            var citizenshipSet = false
             if (claims.has("P27")) {
                 val p27Qid = extractClaimQid(claims, "P27")
                 if (p27Qid != null && resolvedLabels.containsKey(p27Qid)) {
-                    binding.actorGender.text = resolvedLabels[p27Qid]
-                    binding.rowGender.visibility = View.VISIBLE
-                    citizenshipSet = true
+                    binding.actorCitizenship.text = resolvedLabels[p27Qid]
+                    binding.rowCitizenship.visibility = View.VISIBLE
                 }
             }
         }
     }
 
     private fun bindTmdbDetails(binding: FragmentActorPopupBinding, json: JSONObject) {
-        binding.loadingIndicator.visibility = View.GONE
+        binding.shimmerLayout.visibility = View.GONE
+        binding.shimmerLayout.stopShimmer()
         binding.contentContainer.visibility = View.VISIBLE
 
         binding.actorImage.loadImage(actorImageUrl)

@@ -16,7 +16,8 @@ data class FilmographyItem(
     val title: String,
     val posterPath: String?,
     val releaseDate: String?,
-    val mediaType: String
+    val mediaType: String,
+    val popularity: Double = 0.0
 )
 
 class ActorFilmographyAdapter(
@@ -66,6 +67,8 @@ class ActorFilmographyAdapter(
             )
 
             binding.titleText.text = item.title
+            binding.titleText.maxWidth = HomeChildItemAdapter.minPosterSize - 8
+            binding.titleText.maxLines = 2
             binding.titleText.visibility = if (showTitle) View.VISIBLE else View.GONE
 
             val year = item.releaseDate?.take(4)

@@ -3,7 +3,40 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/primaryBlackBackground">
+    android:background="?attr/primaryBlackBackground"
+    android:fitsSystemWindows="false">
+
+    <View
+        android:id="@+id/gradientOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_gravity="top|start"
+        android:importantForAccessibility="no" />
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="56dp"
+        android:visibility="gone"
+        app:shimmer_auto_start="true"
+        app:shimmer_base_alpha="0.2"
+        app:shimmer_duration="@integer/loading_time"
+        app:shimmer_highlight_alpha="0.3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/loading_line_short_center" />
+
+            <include layout="@layout/loading_list" />
+            <include layout="@layout/loading_list" />
+            <include layout="@layout/loading_list" />
+        </LinearLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
@@ -24,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="12dp"
                 android:paddingBottom="16dp">
 
                 <com.google.android.material.imageview.ShapeableImageView
@@ -80,7 +113,7 @@
                     android:textStyle="bold"
                     android:textColor="?attr/textColor"
                     android:fontFamily="@font/google_sans"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="12dp"
                     android:paddingBottom="8dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -89,8 +122,8 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:nestedScrollingEnabled="false"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -109,7 +142,7 @@
                     android:textStyle="bold"
                     android:textColor="?attr/textColor"
                     android:fontFamily="@font/google_sans"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="12dp"
                     android:paddingBottom="8dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -118,8 +151,8 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:nestedScrollingEnabled="false"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -138,7 +171,7 @@
                     android:textStyle="bold"
                     android:textColor="?attr/textColor"
                     android:fontFamily="@font/google_sans"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="12dp"
                     android:paddingBottom="8dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -147,8 +180,8 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:nestedScrollingEnabled="false"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -175,13 +208,6 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <View
-        android:id="@+id/gradientOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="220dp"
-        android:layout_gravity="top|start"
-        android:importantForAccessibility="no" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/backButton"

@@ -203,6 +203,34 @@
                         </LinearLayout>
 
                         <LinearLayout
+                            android:id="@+id/row_citizenship"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_citizenship"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_citizenship"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:id="@+id/row_height"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -295,5 +323,45 @@
         android:layout_height="40dp"
         android:layout_gravity="center"
         android:visibility="visible" />
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        app:shimmer_auto_start="true"
+        app:shimmer_base_alpha="0.2"
+        app:shimmer_duration="@integer/loading_time"
+        app:shimmer_highlight_alpha="0.3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center_vertical">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@color/grayShimmer"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="0dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <include layout="@layout/loading_line" />
+                <include layout="@layout/loading_line_short" />
+                <include layout="@layout/loading_line_short" />
+                <include layout="@layout/loading_line_short" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
 </FrameLayout>

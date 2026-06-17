@@ -777,6 +777,7 @@
     <string name="actor_age">Age:</string>
     <string name="actor_gender">Gender:</string>
     <string name="actor_birthplace">Birthplace:</string>
+    <string name="actor_citizenship">Citizenship:</string>
     <string name="actor_biography">Biography</string>
     <string name="actor_years_old">years old</string>
     <string name="actor_female">Female</string>
