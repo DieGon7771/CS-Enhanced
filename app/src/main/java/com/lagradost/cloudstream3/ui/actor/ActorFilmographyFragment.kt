@@ -47,7 +47,7 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
 
     override fun fixLayout(view: View) {
         fixSystemBarsPadding(view, padTop = false)
-        fixPaddingStatusbarMargin(binding.backButton)
+        fixPaddingStatusbarMargin(binding?.backButton)
     }
 
     override fun onBindingCreated(binding: FragmentActorFilmographyBinding) {
