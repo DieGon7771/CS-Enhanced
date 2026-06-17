@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.lagradost.cloudstream3.databinding.ItemPosterCardBinding
+import com.lagradost.cloudstream3.ui.home.HomeChildItemAdapter
 import com.lagradost.cloudstream3.utils.ImageLoader.loadImage
 
 data class FilmographyItem(
@@ -43,6 +44,10 @@ class ActorFilmographyAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: FilmographyItem) {
+            val params = binding.posterCard.layoutParams
+            params.width = HomeChildItemAdapter.maxPosterSize
+            params.height = HomeChildItemAdapter.minPosterSize
+            binding.posterCard.layoutParams = params
             if (!item.posterPath.isNullOrEmpty()) {
                 binding.posterImage.loadImage("https://image.tmdb.org/t/p/w500${item.posterPath}")
                 binding.posterImage.visibility = View.VISIBLE

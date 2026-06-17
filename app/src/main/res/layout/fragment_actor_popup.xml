@@ -63,6 +63,7 @@
                         android:fontFamily="@font/google_sans" />
 
                     <LinearLayout
+                        android:id="@+id/row_birthday"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -89,7 +90,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/death_layout"
+                        android:id="@+id/row_death"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -116,6 +117,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/row_age"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -141,6 +143,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/row_gender"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -167,6 +170,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/row_birthplace"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -192,38 +196,64 @@
                             android:fontFamily="@font/google_sans" />
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:id="@+id/row_height"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="4dp"
+                        android:visibility="gone"
+                        android:baselineAligned="false">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/actor_height"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/google_sans" />
+
+                        <TextView
+                            android:id="@+id/actor_height"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:layout_marginStart="4dp"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/google_sans" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/row_weight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="4dp"
+                        android:visibility="gone"
+                        android:baselineAligned="false">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/actor_weight"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/google_sans" />
+
+                        <TextView
+                            android:id="@+id/actor_weight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:layout_marginStart="4dp"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/google_sans" />
+                    </LinearLayout>
+
                 </LinearLayout>
             </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?android:attr/listDivider"
-                android:layout_marginHorizontal="20dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/actor_biography"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="?attr/textColor"
-                android:fontFamily="@font/google_sans"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="8dp" />
-
-            <TextView
-                android:id="@+id/actor_bio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:lineSpacingExtra="2dp"
-                android:textColor="?attr/grayTextColor"
-                android:fontFamily="@font/google_sans"
-                android:maxLines="6"
-                android:paddingHorizontal="20dp"
-                android:paddingBottom="12dp" />
 
             <ProgressBar
                 android:id="@+id/loading_indicator"
