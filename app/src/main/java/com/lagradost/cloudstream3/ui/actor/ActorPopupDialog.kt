@@ -56,10 +56,8 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
     }
 
     private fun setupViews(binding: FragmentActorPopupBinding) {
-        binding.actorName.text = actorName
-        if (!actorImageUrl.isNullOrEmpty()) {
-            binding.actorImage.loadImage(actorImageUrl)
-        }
+        binding.contentContainer.visibility = View.GONE
+        binding.loadingIndicator.visibility = View.VISIBLE
 
         binding.filmographyButton.setOnClickListener {
             val activity = activity
@@ -86,8 +84,6 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
     }
 
     private fun loadActorDetails(binding: FragmentActorPopupBinding) {
-        binding.loadingIndicator.visibility = View.VISIBLE
-
         ioSafe {
             try {
                 val externalResponse = app.get(
@@ -110,8 +106,10 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
                         )
                     )
                     val wikidataJson = JSONObject(wikidataResponse.text)
+
                     if (wikidataJson.optInt("success", 0) == 1) {
-                        main { bindWikidataDetails(binding, wikidataJson, wikidataId, lang) }
+                        val resolvedLabels = resolvePlaceAndCitizenship(wikidataJson, wikidataId, lang)
+                        main { bindWikidataDetails(binding, wikidataJson, wikidataId, lang, resolvedLabels) }
                         return@ioSafe
                     }
                 }
@@ -135,19 +133,73 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
         }
     }
 
-    private fun bindWikidataDetails(binding: FragmentActorPopupBinding, json: JSONObject, qid: String, lang: String) {
+    private fun resolvePlaceAndCitizenship(wikidataJson: JSONObject, qid: String, lang: String): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        try {
+            val entities = wikidataJson.getJSONObject("entities").getJSONObject(qid)
+            val claims = entities.optJSONObject("claims")
+            if (claims == null) return result
+
+            val qidsToResolve = mutableListOf<String>()
+            var p19Qid: String? = null
+            var p27Qid: String? = null
+
+            if (claims.has("P19")) {
+                p19Qid = extractClaimQid(claims, "P19")
+                if (p19Qid != null) qidsToResolve.add(p19Qid)
+            }
+            if (claims.has("P27")) {
+                p27Qid = extractClaimQid(claims, "P27")
+                if (p27Qid != null) qidsToResolve.add(p27Qid)
+            }
+
+            if (qidsToResolve.isNotEmpty()) {
+                val labelsResponse = app.get(
+                    "https://www.wikidata.org/w/api.php",
+                    params = mapOf(
+                        "action" to "wbgetentities",
+                        "ids" to qidsToResolve.joinToString("|"),
+                        "languages" to "$lang|en",
+                        "format" to "json",
+                        "props" to "labels"
+                    )
+                )
+                val labelsJson = JSONObject(labelsResponse.text)
+                val labelEntities = labelsJson.optJSONObject("entities")
+
+                if (labelEntities != null) {
+                    for (resolveQid in qidsToResolve) {
+                        val entity = labelEntities.optJSONObject(resolveQid)
+                        val label = entity?.optJSONObject("labels")
+                            ?.optJSONObject(lang)?.optString("value", null)
+                            ?: entity?.optJSONObject("labels")
+                                ?.optJSONObject("en")?.optString("value", null)
+                        if (label != null) {
+                            result[resolveQid] = label
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            logError(e)
+        }
+        return result
+    }
+
+    private fun bindWikidataDetails(binding: FragmentActorPopupBinding, json: JSONObject, qid: String, lang: String, resolvedLabels: Map<String, String>) {
         binding.loadingIndicator.visibility = View.GONE
+        binding.contentContainer.visibility = View.VISIBLE
 
         val entities = json.getJSONObject("entities").getJSONObject(qid)
         val labels = entities.optJSONObject("labels")
         val descriptions = entities.optJSONObject("descriptions")
         val claims = entities.optJSONObject("claims")
 
+        binding.actorImage.loadImage(actorImageUrl)
+
         val wdName = labels?.optJSONObject(lang)?.optString("value", null)
             ?: labels?.optJSONObject("en")?.optString("value", null)
-        if (wdName != null) {
-            binding.actorName.text = wdName
-        }
+        binding.actorName.text = wdName ?: actorName
 
         val desc = descriptions?.optJSONObject(lang)?.optString("value", null)
             ?: descriptions?.optJSONObject("en")?.optString("value", null)
@@ -159,11 +211,17 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
         }
 
         if (claims != null) {
+            var hasBirthday = false
+            var birthDateStr: String? = null
+            var deathDateStr: String? = null
+
             if (claims.has("P569")) {
                 val rawTime = extractClaimTime(claims, "P569")
-                if (rawTime != null) {
-                    binding.actorBirthday.text = formatDate(rawTime.substring(1, 11))
+                if (rawTime != null && rawTime.length() >= 11) {
+                    birthDateStr = rawTime.substring(1, 11)
+                    binding.actorBirthday.text = formatDate(birthDateStr)
                     binding.rowBirthday.visibility = View.VISIBLE
+                    hasBirthday = true
                 } else {
                     binding.rowBirthday.visibility = View.GONE
                 }
@@ -171,21 +229,27 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
                 binding.rowBirthday.visibility = View.GONE
             }
 
-            val deathRaw = if (claims.has("P570")) extractClaimTime(claims, "P570") else null
-            if (deathRaw != null) {
-                binding.actorDeathday.text = formatDate(deathRaw.substring(1, 11))
-                binding.rowDeath.visibility = View.VISIBLE
+            if (claims.has("P570")) {
+                val rawTime = extractClaimTime(claims, "P570")
+                if (rawTime != null && rawTime.length() >= 11) {
+                    deathDateStr = rawTime.substring(1, 11)
+                    binding.actorDeathday.text = formatDate(deathDateStr)
+                    binding.rowDeath.visibility = View.VISIBLE
+                } else {
+                    binding.rowDeath.visibility = View.GONE
+                }
             } else {
                 binding.rowDeath.visibility = View.GONE
             }
 
-            val birthRaw = if (claims.has("P569")) extractClaimTime(claims, "P569") else null
-            if (birthRaw != null) {
-                val birthDate = birthRaw.substring(1, 11)
-                val deathDate = if (deathRaw != null) deathRaw.substring(1, 11) else null
-                val age = calculateAge(birthDate, deathDate)
-                binding.actorAge.text = "$age ${getString(R.string.actor_years_old)}"
-                binding.rowAge.visibility = View.VISIBLE
+            if (hasBirthday && birthDateStr != null) {
+                val age = calculateAge(birthDateStr, deathDateStr)
+                if (age > 0) {
+                    binding.actorAge.text = "$age ${getString(R.string.actor_years_old)}"
+                    binding.rowAge.visibility = View.VISIBLE
+                } else {
+                    binding.rowAge.visibility = View.GONE
+                }
             } else {
                 binding.rowAge.visibility = View.GONE
             }
@@ -203,10 +267,16 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
             }
 
             if (claims.has("P2048")) {
-                val amount = extractClaimAmount(claims, "P2048")
-                if (amount != null) {
-                    binding.actorHeight.text = "$amount m"
-                    binding.rowHeight.visibility = View.VISIBLE
+                val rawAmount = extractClaimAmount(claims, "P2048")
+                if (rawAmount != null) {
+                    val heightValue = rawAmount.toDoubleOrNull()
+                    if (heightValue != null && heightValue > 0) {
+                        val meters = if (heightValue > 10) heightValue / 100.0 else heightValue
+                        binding.actorHeight.text = String.format("%.2f m", meters)
+                        binding.rowHeight.visibility = View.VISIBLE
+                    } else {
+                        binding.rowHeight.visibility = View.GONE
+                    }
                 } else {
                     binding.rowHeight.visibility = View.GONE
                 }
@@ -221,10 +291,14 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
                     val rawAmount = weightData?.optString("amount", null)
                     val unitUrl = weightData?.optString("unit", null)
                     if (rawAmount != null) {
-                        val amount = rawAmount.replace("+", "").toDouble()
-                        val kg = if (unitUrl?.endsWith("Q100995") == true) amount * 0.453592 else amount
-                        binding.actorWeight.text = String.format("%.1f kg", kg)
-                        binding.rowWeight.visibility = View.VISIBLE
+                        val amount = rawAmount.replace("+", "").toDoubleOrNull()
+                        if (amount != null && amount > 0) {
+                            val kg = if (unitUrl?.endsWith("Q100995") == true) amount * 0.453592 else amount
+                            binding.actorWeight.text = String.format("%.1f kg", kg)
+                            binding.rowWeight.visibility = View.VISIBLE
+                        } else {
+                            binding.rowWeight.visibility = View.GONE
+                        }
                     } else {
                         binding.rowWeight.visibility = View.GONE
                     }
@@ -235,12 +309,36 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
                 binding.rowWeight.visibility = View.GONE
             }
 
-            binding.rowBirthplace.visibility = View.GONE
+            var birthplaceSet = false
+            if (claims.has("P19")) {
+                val p19Qid = extractClaimQid(claims, "P19")
+                if (p19Qid != null && resolvedLabels.containsKey(p19Qid)) {
+                    binding.actorBirthplace.text = resolvedLabels[p19Qid]
+                    binding.rowBirthplace.visibility = View.VISIBLE
+                    birthplaceSet = true
+                }
+            }
+            if (!birthplaceSet) {
+                binding.rowBirthplace.visibility = View.GONE
+            }
+
+            var citizenshipSet = false
+            if (claims.has("P27")) {
+                val p27Qid = extractClaimQid(claims, "P27")
+                if (p27Qid != null && resolvedLabels.containsKey(p27Qid)) {
+                    binding.actorGender.text = resolvedLabels[p27Qid]
+                    binding.rowGender.visibility = View.VISIBLE
+                    citizenshipSet = true
+                }
+            }
         }
     }
 
     private fun bindTmdbDetails(binding: FragmentActorPopupBinding, json: JSONObject) {
         binding.loadingIndicator.visibility = View.GONE
+        binding.contentContainer.visibility = View.VISIBLE
+
+        binding.actorImage.loadImage(actorImageUrl)
 
         val birthday = json.optString("birthday", null)
         val deathday = json.optString("deathday", null)
@@ -264,8 +362,13 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
         if (!birthday.isNullOrEmpty()) {
             binding.actorBirthday.text = formatDate(birthday)
             binding.rowBirthday.visibility = View.VISIBLE
-            binding.actorAge.text = "${calculateAge(birthday, deathday)} ${getString(R.string.actor_years_old)}"
-            binding.rowAge.visibility = View.VISIBLE
+            val age = calculateAge(birthday, deathday)
+            if (age > 0) {
+                binding.actorAge.text = "$age ${getString(R.string.actor_years_old)}"
+                binding.rowAge.visibility = View.VISIBLE
+            } else {
+                binding.rowAge.visibility = View.GONE
+            }
         } else {
             binding.rowBirthday.visibility = View.GONE
             binding.rowAge.visibility = View.GONE
@@ -293,18 +396,14 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
         return try {
             claims.getJSONArray(property).getJSONObject(0)
                 .optJSONObject("mainsnak")?.optJSONObject("datavalue")?.optJSONObject("value")?.optString("time", null)
-        } catch (e: Exception) {
-            null
-        }
+        } catch (e: Exception) { null }
     }
 
     private fun extractClaimQid(claims: JSONObject, property: String): String? {
         return try {
             claims.getJSONArray(property).getJSONObject(0)
                 .optJSONObject("mainsnak")?.optJSONObject("datavalue")?.optJSONObject("value")?.optString("id", null)
-        } catch (e: Exception) {
-            null
-        }
+        } catch (e: Exception) { null }
     }
 
     private fun extractClaimAmount(claims: JSONObject, property: String): String? {
@@ -312,20 +411,16 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
             val raw = claims.getJSONArray(property).getJSONObject(0)
                 .optJSONObject("mainsnak")?.optJSONObject("datavalue")?.optJSONObject("value")?.optString("amount", null)
             raw?.replace("+", "")
-        } catch (e: Exception) {
-            null
-        }
+        } catch (e: Exception) { null }
     }
 
     private fun formatDate(dateString: String): String {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-            val outputFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("MMMM d, yyyy", Locale.US)
             val date = inputFormat.parse(dateString)
             outputFormat.format(date)
-        } catch (e: Exception) {
-            dateString
-        }
+        } catch (e: Exception) { dateString }
     }
 
     private fun calculateAge(birthday: String, deathday: String?): Int {
@@ -343,10 +438,8 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
             if (endCalendar.get(Calendar.DAY_OF_YEAR) < birthCalendar.get(Calendar.DAY_OF_YEAR)) {
                 age--
             }
-            age
-        } catch (e: Exception) {
-            0
-        }
+            if (age < 0) 0 else age
+        } catch (e: Exception) { 0 }
     }
 
     private fun getTmdbLanguageCode(): String {

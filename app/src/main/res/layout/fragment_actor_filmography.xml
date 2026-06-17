@@ -29,8 +29,8 @@
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/actorImage"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
+                    android:layout_width="130dp"
+                    android:layout_height="130dp"
                     android:scaleType="centerCrop"
                     app:shapeAppearanceOverlay="@style/roundedImageView"
                     android:src="@drawable/ic_baseline_person_24"
@@ -40,7 +40,7 @@
                     android:id="@+id/actorName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="20sp"
+                    android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="?attr/textColor"
                     android:fontFamily="@font/google_sans"
@@ -175,6 +175,13 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <View
+        android:id="@+id/gradientOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_gravity="top|start"
+        android:importantForAccessibility="no" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/backButton"

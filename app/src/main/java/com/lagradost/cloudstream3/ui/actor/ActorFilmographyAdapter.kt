@@ -1,9 +1,12 @@
 package com.lagradost.cloudstream3.ui.actor
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
+import com.lagradost.cloudstream3.R
 import com.lagradost.cloudstream3.databinding.ItemPosterCardBinding
 import com.lagradost.cloudstream3.ui.home.HomeChildItemAdapter
 import com.lagradost.cloudstream3.utils.ImageLoader.loadImage
@@ -45,8 +48,8 @@ class ActorFilmographyAdapter(
 
         fun bind(item: FilmographyItem) {
             val params = binding.posterCard.layoutParams
-            params.width = HomeChildItemAdapter.maxPosterSize
-            params.height = HomeChildItemAdapter.minPosterSize
+            params.width = HomeChildItemAdapter.minPosterSize
+            params.height = HomeChildItemAdapter.maxPosterSize
             binding.posterCard.layoutParams = params
             if (!item.posterPath.isNullOrEmpty()) {
                 binding.posterImage.loadImage("https://image.tmdb.org/t/p/w500${item.posterPath}")
@@ -57,7 +60,13 @@ class ActorFilmographyAdapter(
                 binding.posterPlaceholder.visibility = View.VISIBLE
             }
 
+            val prefs = PreferenceManager.getDefaultSharedPreferences(binding.root.context)
+            val showTitle = prefs.getBoolean(
+                binding.root.context.getString(R.string.show_title_key), true
+            )
+
             binding.titleText.text = item.title
+            binding.titleText.visibility = if (showTitle) View.VISIBLE else View.GONE
 
             val year = item.releaseDate?.take(4)
             binding.yearText.text = year

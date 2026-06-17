@@ -1,7 +1,10 @@
 package com.lagradost.cloudstream3.ui.actor
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.lagradost.cloudstream3.R
@@ -45,6 +48,8 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     }
 
     override fun onBindingCreated(binding: FragmentActorFilmographyBinding) {
+        setupGradient(binding)
+
         actorId = arguments?.getInt("actor_id") ?: 0
         actorName = arguments?.getString("actor_name") ?: ""
         actorImageUrl = arguments?.getString("actor_image")
@@ -203,6 +208,23 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     private fun getTmdbLanguageCode(): String {
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext())
         return prefs.getString("locale_key", "en-US") ?: "en-US"
+    }
+
+    private fun setupGradient(binding: FragmentActorFilmographyBinding) {
+        val ta = requireContext().obtainStyledAttributes(intArrayOf(android.R.attr.colorPrimary))
+        val primaryColor = ta.getColor(0, Color.BLACK)
+        ta.recycle()
+
+        val gradientDrawable = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                Color.argb(38, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor)),
+                Color.argb(25, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor)),
+                Color.argb(10, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor)),
+                Color.TRANSPARENT
+            )
+        )
+        binding.gradientOverlay.background = gradientDrawable
     }
 
     override fun onDestroyView() {
