@@ -133,7 +133,7 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
         }
     }
 
-    private fun resolvePlaceAndCitizenship(wikidataJson: JSONObject, qid: String, lang: String): Map<String, String> {
+    private suspend fun resolvePlaceAndCitizenship(wikidataJson: JSONObject, qid: String, lang: String): Map<String, String> {
         val result = mutableMapOf<String, String>()
         try {
             val entities = wikidataJson.getJSONObject("entities").getJSONObject(qid)
@@ -217,7 +217,7 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
 
             if (claims.has("P569")) {
                 val rawTime = extractClaimTime(claims, "P569")
-                if (rawTime != null && rawTime.length() >= 11) {
+                if (rawTime != null && rawTime.length >= 11) {
                     birthDateStr = rawTime.substring(1, 11)
                     binding.actorBirthday.text = formatDate(birthDateStr)
                     binding.rowBirthday.visibility = View.VISIBLE
@@ -231,7 +231,7 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
 
             if (claims.has("P570")) {
                 val rawTime = extractClaimTime(claims, "P570")
-                if (rawTime != null && rawTime.length() >= 11) {
+                if (rawTime != null && rawTime.length >= 11) {
                     deathDateStr = rawTime.substring(1, 11)
                     binding.actorDeathday.text = formatDate(deathDateStr)
                     binding.rowDeath.visibility = View.VISIBLE
