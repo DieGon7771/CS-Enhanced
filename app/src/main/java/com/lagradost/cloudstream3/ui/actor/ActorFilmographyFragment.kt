@@ -100,7 +100,7 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         binding.actorName.text = actorName
         if (!actorImageUrl.isNullOrEmpty()) {
             binding.heroBackground.loadImage(actorImageUrl) {
-                transformations(BlurTransformation(25))
+                BlurTransformation(25)
             }
             binding.actorProfileImage.loadImage(actorImageUrl)
         }
