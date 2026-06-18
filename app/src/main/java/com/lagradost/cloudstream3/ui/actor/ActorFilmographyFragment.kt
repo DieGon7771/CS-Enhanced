@@ -1,12 +1,15 @@
 package com.lagradost.cloudstream3.ui.actor
 
+import android.app.AlertDialog
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.text.Spanned
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.core.view.WindowCompat
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,7 +29,6 @@ import com.lagradost.cloudstream3.utils.UIHelper.fixSystemBarsPadding
 import kotlinx.coroutines.Job
 import org.json.JSONArray
 import org.json.JSONObject
-import java.text.SimpleDateFormat
 import java.util.*
 
 class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
@@ -39,18 +41,14 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     private val filmographyList = mutableListOf<FilmographyItem>()
     private val seenIds = mutableSetOf<Int>()
 
-    private var popularItems = listOf<FilmographyItem>()
-    private var latestItems = listOf<FilmographyItem>()
-    private var upcomingItems = listOf<FilmographyItem>()
     private var knownForItems = listOf<FilmographyItem>()
     private var biography: String? = null
     private var knownForDepartment: String? = null
 
-    private val popularAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
-    private val latestAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
-    private val upcomingAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
     private val knownForAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
+    private val filmographyAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
 
+    private var selectedMediaType = "movie"
     private var loadJob: Job? = null
 
     private data class PersonCacheData(
@@ -101,27 +99,56 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     private fun setupViews(binding: FragmentActorFilmographyBinding) {
         binding.actorName.text = actorName
         if (!actorImageUrl.isNullOrEmpty()) {
-            binding.heroBackground.loadImage(actorImageUrl)
+            binding.heroBackground.loadImage(actorImageUrl) {
+                transformations(BlurTransformation(25))
+            }
             binding.actorProfileImage.loadImage(actorImageUrl)
         }
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
-        binding.popularTitle.setOnClickListener {
-            if (popularItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_popular), popularItems)
+
+        binding.knownForTitle.setOnClickListener {
+            if (knownForItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_known_for), knownForItems)
         }
-        binding.latestTitle.setOnClickListener {
-            if (latestItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_latest), latestItems)
-        }
-        binding.upcomingTitle.setOnClickListener {
-            if (upcomingItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_upcoming), upcomingItems)
-        }
+
         binding.biographyTitle.setOnClickListener {
             if (!biography.isNullOrBlank()) showBiographyDialog()
         }
         binding.biographyText.setOnClickListener {
             if (!biography.isNullOrBlank()) showBiographyDialog()
         }
+
+        binding.moviesTab.setOnClickListener { selectTab(binding, "movie") }
+        binding.tvShowsTab.setOnClickListener { selectTab(binding, "tv") }
+    }
+
+    private fun selectTab(binding: FragmentActorFilmographyBinding, mediaType: String) {
+        if (selectedMediaType == mediaType) return
+        selectedMediaType = mediaType
+
+        updateTabStyles(binding)
+        updateFilmographyList(binding)
+    }
+
+    private fun updateTabStyles(binding: FragmentActorFilmographyBinding) {
+        val selectedBg = Color.parseColor("#FF3D3D3D")
+        val unselectedBg = Color.TRANSPARENT
+        val selectedStroke = Color.parseColor("#FF3D3D3D")
+        val unselectedStroke = Color.parseColor("#FF555555")
+
+        binding.moviesTab.backgroundTintList = android.content.res.ColorStateList.valueOf(
+            if (selectedMediaType == "movie") selectedBg else unselectedBg
+        )
+        binding.moviesTab.strokeColor = android.content.res.ColorStateList.valueOf(
+            if (selectedMediaType == "movie") selectedStroke else unselectedStroke
+        )
+        binding.tvShowsTab.backgroundTintList = android.content.res.ColorStateList.valueOf(
+            if (selectedMediaType == "tv") selectedBg else unselectedBg
+        )
+        binding.tvShowsTab.strokeColor = android.content.res.ColorStateList.valueOf(
+            if (selectedMediaType == "tv") selectedStroke else unselectedStroke
+        )
     }
 
     private fun setupRecyclerViews(binding: FragmentActorFilmographyBinding) {
@@ -130,20 +157,10 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         )
         binding.knownForRecycler.adapter = knownForAdapter
 
-        binding.popularRecycler.layoutManager = LinearLayoutManager(
+        binding.filmographyRecycler.layoutManager = LinearLayoutManager(
             requireContext(), RecyclerView.HORIZONTAL, false
         )
-        binding.popularRecycler.adapter = popularAdapter
-
-        binding.latestRecycler.layoutManager = LinearLayoutManager(
-            requireContext(), RecyclerView.HORIZONTAL, false
-        )
-        binding.latestRecycler.adapter = latestAdapter
-
-        binding.upcomingRecycler.layoutManager = LinearLayoutManager(
-            requireContext(), RecyclerView.HORIZONTAL, false
-        )
-        binding.upcomingRecycler.adapter = upcomingAdapter
+        binding.filmographyRecycler.adapter = filmographyAdapter
     }
 
     private fun loadFilmography(binding: FragmentActorFilmographyBinding) {
@@ -253,24 +270,9 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
             return
         }
 
-        val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-
         knownForItems = filmographyList
             .sortedByDescending { it.popularity }
             .take(10)
-
-        popularItems = filmographyList
-            .sortedByDescending { it.popularity }
-            .take(30)
-
-        latestItems = filmographyList
-            .filter { !it.releaseDate.orEmpty().isNullOrEmpty() && it.releaseDate.orEmpty() <= todayStr }
-            .sortedByDescending { it.releaseDate.orEmpty() }
-            .take(30)
-
-        upcomingItems = filmographyList
-            .filter { !it.releaseDate.orEmpty().isNullOrEmpty() && it.releaseDate.orEmpty() > todayStr }
-            .sortedBy { it.releaseDate.orEmpty() }
 
         if (knownForItems.isNotEmpty()) {
             knownForAdapter.submitList(knownForItems)
@@ -282,20 +284,27 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
             binding.biographySection.visibility = View.VISIBLE
         }
 
-        if (popularItems.isNotEmpty()) {
-            popularAdapter.submitList(popularItems)
-            binding.popularSection.visibility = View.VISIBLE
+        selectedMediaType = "movie"
+        updateTabStyles(binding)
+        updateFilmographyList(binding)
+    }
+
+    private fun updateFilmographyList(binding: FragmentActorFilmographyBinding) {
+        val filtered = filmographyList
+            .filter { it.mediaType == selectedMediaType }
+            .sortedByDescending { it.releaseDate.orEmpty() }
+
+        if (filtered.isNotEmpty()) {
+            filmographyAdapter.submitList(filtered)
+            binding.filmographySection.visibility = View.VISIBLE
+        } else {
+            binding.filmographySection.visibility = View.GONE
         }
-        if (latestItems.isNotEmpty()) {
-            latestAdapter.submitList(latestItems)
-            binding.latestSection.visibility = View.VISIBLE
-        }
-        if (upcomingItems.isNotEmpty()) {
-            upcomingAdapter.submitList(upcomingItems)
-            binding.upcomingSection.visibility = View.VISIBLE
-        }
-        if (knownForItems.isEmpty() && popularItems.isEmpty() && latestItems.isEmpty() && upcomingItems.isEmpty()) {
+
+        if (knownForItems.isEmpty() && filtered.isEmpty() && biography.isNullOrBlank()) {
             binding.emptyState.visibility = View.VISIBLE
+        } else {
+            binding.emptyState.visibility = View.GONE
         }
     }
 
@@ -334,11 +343,35 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         } else {
             Html.fromHtml(text)
         }
-        val dialog = BottomSheetDialog(activity)
+
         val rootView = layoutInflater.inflate(R.layout.bottom_text_dialog, null)
-        dialog.setContentView(rootView)
         rootView.findViewById<android.widget.TextView>(R.id.dialog_title).text = getString(R.string.actor_biography)
         rootView.findViewById<android.widget.TextView>(R.id.dialog_text).text = spanned
+
+        val dialog = AlertDialog.Builder(activity)
+            .setView(rootView)
+            .create()
+
+        dialog.setCanceledOnTouchOutside(true)
+        dialog.setCancelable(true)
+
+        dialog.window?.let { window ->
+            window.setLayout(
+                (resources.displayMetrics.widthPixels * 0.9).toInt(),
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+            window.attributes?.let { params ->
+                params.gravity = android.view.Gravity.CENTER
+                window.attributes = params
+            }
+            val drawable = GradientDrawable().apply {
+                setColor(Color.parseColor("#FF1E1E1E"))
+                cornerRadius = resources.getDimension(R.dimen.rounded_button_radius)
+            }
+            window.setBackgroundDrawable(drawable)
+        }
+
         dialog.show()
     }
 

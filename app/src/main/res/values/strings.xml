@@ -790,6 +790,8 @@
     <string name="actor_error">Error loading actor details</string>
     <string name="actor_search_web">Search on web</string>
     <string name="actor_filmography">Filmography</string>
+    <string name="actor_movies">Movies</string>
+    <string name="actor_tv_shows">TV Shows</string>
     <string name="actor_latest">Latest</string>
     <string name="actor_upcoming">Upcoming</string>
     <string name="actor_as_character">as %s</string>
