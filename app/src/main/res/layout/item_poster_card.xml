@@ -47,6 +47,21 @@
 
             </FrameLayout>
 
+            <TextView
+                android:id="@+id/yearBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="4dp"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/rating_badge_background"
+                android:visibility="gone" />
+
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 

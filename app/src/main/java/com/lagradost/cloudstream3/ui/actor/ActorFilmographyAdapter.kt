@@ -52,13 +52,15 @@ class ActorFilmographyAdapter(
             params.width = HomeChildItemAdapter.minPosterSize
             params.height = HomeChildItemAdapter.maxPosterSize
             binding.posterCard.layoutParams = params
+
             if (!item.posterPath.isNullOrEmpty()) {
                 binding.posterImage.loadImage("https://image.tmdb.org/t/p/w500${item.posterPath}")
                 binding.posterImage.visibility = View.VISIBLE
                 binding.posterPlaceholder.visibility = View.GONE
             } else {
-                binding.posterImage.visibility = View.GONE
-                binding.posterPlaceholder.visibility = View.VISIBLE
+                binding.posterImage.loadImage(R.drawable.default_cover)
+                binding.posterImage.visibility = View.VISIBLE
+                binding.posterPlaceholder.visibility = View.GONE
             }
 
             val prefs = PreferenceManager.getDefaultSharedPreferences(binding.root.context)
@@ -72,8 +74,9 @@ class ActorFilmographyAdapter(
             binding.titleText.visibility = if (showTitle) View.VISIBLE else View.GONE
 
             val year = item.releaseDate?.take(4)
-            binding.yearText.text = year
-            binding.yearText.visibility = if (year != null) View.VISIBLE else View.GONE
+            binding.yearText.visibility = View.GONE
+            binding.yearBadge.text = year
+            binding.yearBadge.visibility = if (year != null) View.VISIBLE else View.GONE
 
             binding.posterCard.setOnClickListener {
                 onItemClick(item)
