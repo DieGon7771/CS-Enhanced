@@ -59,6 +59,12 @@
 
                 <View
                     android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_gravity="top"
+                    android:background="@drawable/background_shadow_top" />
+
+                <View
+                    android:layout_width="match_parent"
                     android:layout_height="120dp"
                     android:layout_gravity="bottom"
                     android:background="@drawable/background_shadow" />
@@ -73,13 +79,14 @@
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/actorProfileImage"
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
+                        android:layout_width="96dp"
+                        android:layout_height="96dp"
                         android:scaleType="centerCrop"
                         android:src="@drawable/ic_baseline_person_24"
+                        android:translationY="24dp"
                         app:shapeAppearanceOverlay="@style/roundedImageView"
                         app:strokeWidth="2dp"
-                        app:strokeColor="?attr/textColor"
+                        app:strokeColor="@android:color/white"
                         android:importantForAccessibility="no" />
 
                     <LinearLayout
@@ -92,7 +99,7 @@
                             android:id="@+id/actorName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="22sp"
+                            android:textSize="24sp"
                             android:textStyle="bold"
                             android:textColor="?attr/textColor"
                             android:fontFamily="@font/google_sans"
@@ -110,11 +117,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </FrameLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?android:attr/listDivider" />
 
             <ProgressBar
                 android:id="@+id/loadingIndicator"
@@ -156,6 +158,11 @@
                     android:paddingEnd="5dp" />
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
             <!-- Biography Section -->
             <LinearLayout
                 android:id="@+id/biographySection"
@@ -166,7 +173,8 @@
                 android:visibility="gone">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/biographyTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/actor_biography"
                     android:textSize="18sp"
@@ -174,35 +182,25 @@
                     android:textColor="?attr/textColor"
                     android:fontFamily="@font/google_sans"
                     android:paddingHorizontal="12dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingBottom="8dp"
+                    android:layout_marginEnd="50dp"
+                    app:drawableRightCompat="@drawable/ic_baseline_keyboard_arrow_right_24" />
 
-                <FrameLayout
+                <TextView
+                    android:id="@+id/biographyText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="12dp">
-
-                    <TextView
-                        android:id="@+id/biographyText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textColor="?attr/grayTextColor"
-                        android:fontFamily="@font/google_sans"
-                        android:maxLines="4"
-                        android:ellipsize="end"
-                        android:lineSpacingExtra="2dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?android:attr/selectableItemBackground" />
-
-                    <ImageView
-                        android:id="@+id/biographyFade"
-                        android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:layout_gravity="bottom"
-                        android:src="@drawable/background_shadow"
-                        android:importantForAccessibility="no" />
-                </FrameLayout>
+                    android:paddingHorizontal="12dp"
+                    android:textSize="14sp"
+                    android:textColor="?attr/grayTextColor"
+                    android:fontFamily="@font/google_sans"
+                    android:maxLines="3"
+                    android:ellipsize="end"
+                    android:requiresFadingEdge="vertical"
+                    android:lineSpacingExtra="2dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground" />
             </LinearLayout>
 
             <!-- Popular Section -->

@@ -292,7 +292,7 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/filmography_button"
             style="@style/BlackButton"
             android:layout_width="match_parent"
@@ -301,10 +301,14 @@
             android:layout_marginBottom="4dp"
             android:text="@string/actor_filmography"
             android:fontFamily="@font/google_sans"
-            android:drawableStart="@drawable/ic_baseline_film_roll_24"
-            android:drawablePadding="8dp" />
+            app:icon="@drawable/ic_baseline_film_roll_24"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconSize="24dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/search_web_button"
             style="@style/BlackButton"
             android:layout_width="match_parent"
@@ -314,8 +318,12 @@
             android:layout_marginBottom="16dp"
             android:text="@string/actor_search_web"
             android:fontFamily="@font/google_sans"
-            android:drawableStart="@drawable/ic_baseline_language_24"
-            android:drawablePadding="8dp" />
+            app:icon="@drawable/ic_baseline_language_24"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconSize="24dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
 
     </LinearLayout>
 

@@ -116,6 +116,9 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         binding.upcomingTitle.setOnClickListener {
             if (upcomingItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_upcoming), upcomingItems)
         }
+        binding.biographyTitle.setOnClickListener {
+            if (!biography.isNullOrBlank()) showBiographyDialog()
+        }
         binding.biographyText.setOnClickListener {
             if (!biography.isNullOrBlank()) showBiographyDialog()
         }
