@@ -779,6 +779,7 @@
     <string name="actor_birthplace">Birthplace:</string>
     <string name="actor_citizenship">Citizenship:</string>
     <string name="actor_biography">Biography</string>
+    <string name="actor_known_for">Known For</string>
     <string name="actor_years_old">years old</string>
     <string name="actor_female">Female</string>
     <string name="actor_male">Male</string>

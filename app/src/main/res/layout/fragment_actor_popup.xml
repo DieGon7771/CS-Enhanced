@@ -301,7 +301,7 @@
             android:layout_marginBottom="4dp"
             android:text="@string/actor_filmography"
             android:fontFamily="@font/google_sans"
-            android:drawableStart="@drawable/ic_baseline_search_24"
+            android:drawableStart="@drawable/ic_baseline_film_roll_24"
             android:drawablePadding="8dp" />
 
         <Button
@@ -313,7 +313,9 @@
             android:layout_marginTop="4dp"
             android:layout_marginBottom="16dp"
             android:text="@string/actor_search_web"
-            android:fontFamily="@font/google_sans" />
+            android:fontFamily="@font/google_sans"
+            android:drawableStart="@drawable/ic_baseline_language_24"
+            android:drawablePadding="8dp" />
 
     </LinearLayout>
 

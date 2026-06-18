@@ -1,13 +1,13 @@
 package com.lagradost.cloudstream3.ui.actor
 
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
+import android.text.Html
+import android.text.Spanned
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.WindowCompat
-import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -42,16 +42,26 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     private var popularItems = listOf<FilmographyItem>()
     private var latestItems = listOf<FilmographyItem>()
     private var upcomingItems = listOf<FilmographyItem>()
+    private var knownForItems = listOf<FilmographyItem>()
+    private var biography: String? = null
+    private var knownForDepartment: String? = null
 
     private val popularAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
     private val latestAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
     private val upcomingAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
+    private val knownForAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
 
     private var loadJob: Job? = null
 
+    private data class PersonCacheData(
+        val credits: List<FilmographyItem>,
+        val biography: String?,
+        val knownForDepartment: String?
+    )
+
     companion object {
         private const val TMDB_API_KEY = "e6333b32409e02a4a6eba6fb7ff866bb"
-        private val filmographyCache = mutableMapOf<Int, List<FilmographyItem>>()
+        private val personCache = mutableMapOf<Int, PersonCacheData>()
     }
 
     override fun fixLayout(view: View) {
@@ -61,7 +71,6 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
 
     override fun onBindingCreated(binding: FragmentActorFilmographyBinding) {
         setupTransparentStatusBar()
-        setupGradient(binding)
 
         actorId = arguments?.getInt("actor_id") ?: 0
         actorName = arguments?.getString("actor_name") ?: ""
@@ -92,7 +101,8 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     private fun setupViews(binding: FragmentActorFilmographyBinding) {
         binding.actorName.text = actorName
         if (!actorImageUrl.isNullOrEmpty()) {
-            binding.actorImage.loadImage(actorImageUrl)
+            binding.heroBackground.loadImage(actorImageUrl)
+            binding.actorProfileImage.loadImage(actorImageUrl)
         }
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
@@ -106,35 +116,44 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         binding.upcomingTitle.setOnClickListener {
             if (upcomingItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_upcoming), upcomingItems)
         }
+        binding.biographyText.setOnClickListener {
+            if (!biography.isNullOrBlank()) showBiographyDialog()
+        }
     }
 
     private fun setupRecyclerViews(binding: FragmentActorFilmographyBinding) {
-        binding.popularRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
-            requireContext(), androidx.recyclerview.widget.RecyclerView.HORIZONTAL, false
+        binding.knownForRecycler.layoutManager = LinearLayoutManager(
+            requireContext(), RecyclerView.HORIZONTAL, false
+        )
+        binding.knownForRecycler.adapter = knownForAdapter
+
+        binding.popularRecycler.layoutManager = LinearLayoutManager(
+            requireContext(), RecyclerView.HORIZONTAL, false
         )
         binding.popularRecycler.adapter = popularAdapter
 
-        binding.latestRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
-            requireContext(), androidx.recyclerview.widget.RecyclerView.HORIZONTAL, false
+        binding.latestRecycler.layoutManager = LinearLayoutManager(
+            requireContext(), RecyclerView.HORIZONTAL, false
         )
         binding.latestRecycler.adapter = latestAdapter
 
-        binding.upcomingRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
-            requireContext(), androidx.recyclerview.widget.RecyclerView.HORIZONTAL, false
+        binding.upcomingRecycler.layoutManager = LinearLayoutManager(
+            requireContext(), RecyclerView.HORIZONTAL, false
         )
         binding.upcomingRecycler.adapter = upcomingAdapter
     }
 
     private fun loadFilmography(binding: FragmentActorFilmographyBinding) {
-        val cached = filmographyCache[actorId]
+        val cached = personCache[actorId]
         if (cached != null) {
             filmographyList.clear()
-            filmographyList.addAll(cached)
+            filmographyList.addAll(cached.credits)
+            biography = cached.biography
+            knownForDepartment = cached.knownForDepartment
             bindFilmography(binding)
             return
         }
 
-        binding.loadingIndicator.visibility = View.GONE
         binding.shimmerLayout.visibility = View.VISIBLE
         binding.shimmerLayout.startShimmer()
 
@@ -142,9 +161,17 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
             try {
                 val language = getTmdbLanguageCode()
                 val creditsJson = fetchCombinedCredits(language)
-
                 processCredits(creditsJson)
-                filmographyCache[actorId] = filmographyList.toList()
+
+                val personJson = fetchPersonDetails(language)
+                biography = personJson.optString("biography", null)?.takeIf { it.isNotBlank() }
+                knownForDepartment = personJson.optString("known_for_department", null)?.takeIf { it.isNotBlank() }
+
+                personCache[actorId] = PersonCacheData(
+                    credits = filmographyList.toList(),
+                    biography = biography,
+                    knownForDepartment = knownForDepartment
+                )
 
                 main { bindFilmography(binding) }
             } catch (e: Exception) {
@@ -160,6 +187,14 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
             params = mapOf("api_key" to TMDB_API_KEY, "language" to language)
         )
         return JSONObject(response.text).optJSONArray("cast") ?: JSONArray()
+    }
+
+    private suspend fun fetchPersonDetails(language: String): JSONObject {
+        val response = app.get(
+            "https://api.themoviedb.org/3/person/$actorId",
+            params = mapOf("api_key" to TMDB_API_KEY, "language" to language)
+        )
+        return JSONObject(response.text)
     }
 
     private fun processCredits(cast: JSONArray) {
@@ -207,12 +242,19 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         binding.shimmerLayout.visibility = View.GONE
         binding.shimmerLayout.stopShimmer()
 
+        binding.actorDepartment.text = knownForDepartment
+        binding.actorDepartment.visibility = if (knownForDepartment != null) View.VISIBLE else View.GONE
+
         if (filmographyList.isEmpty()) {
             binding.emptyState.visibility = View.VISIBLE
             return
         }
 
         val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+
+        knownForItems = filmographyList
+            .sortedByDescending { it.popularity }
+            .take(10)
 
         popularItems = filmographyList
             .sortedByDescending { it.popularity }
@@ -227,6 +269,16 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
             .filter { !it.releaseDate.orEmpty().isNullOrEmpty() && it.releaseDate.orEmpty() > todayStr }
             .sortedBy { it.releaseDate.orEmpty() }
 
+        if (knownForItems.isNotEmpty()) {
+            knownForAdapter.submitList(knownForItems)
+            binding.knownForSection.visibility = View.VISIBLE
+        }
+
+        if (!biography.isNullOrBlank()) {
+            binding.biographyText.text = biography
+            binding.biographySection.visibility = View.VISIBLE
+        }
+
         if (popularItems.isNotEmpty()) {
             popularAdapter.submitList(popularItems)
             binding.popularSection.visibility = View.VISIBLE
@@ -239,7 +291,7 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
             upcomingAdapter.submitList(upcomingItems)
             binding.upcomingSection.visibility = View.VISIBLE
         }
-        if (popularItems.isEmpty() && latestItems.isEmpty() && upcomingItems.isEmpty()) {
+        if (knownForItems.isEmpty() && popularItems.isEmpty() && latestItems.isEmpty() && upcomingItems.isEmpty()) {
             binding.emptyState.visibility = View.VISIBLE
         }
     }
@@ -271,6 +323,22 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         dialog.show()
     }
 
+    private fun showBiographyDialog() {
+        val activity = activity ?: return
+        val text = biography ?: return
+        val spanned: Spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            Html.fromHtml(text)
+        }
+        val dialog = BottomSheetDialog(activity)
+        val rootView = layoutInflater.inflate(R.layout.bottom_text_dialog, null)
+        dialog.setContentView(rootView)
+        rootView.findViewById<android.widget.TextView>(R.id.dialog_title).text = getString(R.string.actor_biography)
+        rootView.findViewById<android.widget.TextView>(R.id.dialog_text).text = spanned
+        dialog.show()
+    }
+
     private fun showError(binding: FragmentActorFilmographyBinding) {
         binding.shimmerLayout.visibility = View.GONE
         binding.shimmerLayout.stopShimmer()
@@ -279,23 +347,6 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     private fun getTmdbLanguageCode(): String {
         val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext())
         return prefs.getString("locale_key", "en-US") ?: "en-US"
-    }
-
-    private fun setupGradient(binding: FragmentActorFilmographyBinding) {
-        val ta = requireContext().obtainStyledAttributes(intArrayOf(android.R.attr.colorPrimary))
-        val primaryColor = ta.getColor(0, Color.BLACK)
-        ta.recycle()
-
-        val gradientDrawable = GradientDrawable(
-            GradientDrawable.Orientation.TOP_BOTTOM,
-            intArrayOf(
-                Color.argb(38, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor)),
-                Color.argb(25, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor)),
-                Color.argb(10, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor)),
-                Color.TRANSPARENT
-            )
-        )
-        binding.gradientOverlay.background = gradientDrawable
     }
 
     override fun onDestroyView() {
