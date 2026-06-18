@@ -106,7 +106,8 @@
                 android:visibility="gone">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/popularTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/actor_popular"
                     android:textSize="18sp"
@@ -114,7 +115,12 @@
                     android:textColor="?attr/textColor"
                     android:fontFamily="@font/google_sans"
                     android:paddingHorizontal="12dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingVertical="8dp"
+                    android:layout_marginEnd="50dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    app:drawableRightCompat="@drawable/ic_baseline_arrow_forward_24" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/popularRecycler"
@@ -122,6 +128,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp" />
             </LinearLayout>
@@ -135,7 +142,8 @@
                 android:visibility="gone">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/latestTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/actor_latest"
                     android:textSize="18sp"
@@ -143,7 +151,12 @@
                     android:textColor="?attr/textColor"
                     android:fontFamily="@font/google_sans"
                     android:paddingHorizontal="12dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingVertical="8dp"
+                    android:layout_marginEnd="50dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    app:drawableRightCompat="@drawable/ic_baseline_arrow_forward_24" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/latestRecycler"
@@ -151,6 +164,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp" />
             </LinearLayout>
@@ -164,7 +178,8 @@
                 android:visibility="gone">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/upcomingTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/actor_upcoming"
                     android:textSize="18sp"
@@ -172,7 +187,12 @@
                     android:textColor="?attr/textColor"
                     android:fontFamily="@font/google_sans"
                     android:paddingHorizontal="12dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingVertical="8dp"
+                    android:layout_marginEnd="50dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    app:drawableRightCompat="@drawable/ic_baseline_arrow_forward_24" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/upcomingRecycler"
@@ -180,6 +200,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp" />
             </LinearLayout>

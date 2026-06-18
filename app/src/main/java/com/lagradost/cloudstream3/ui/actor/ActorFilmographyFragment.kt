@@ -5,9 +5,13 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.lagradost.cloudstream3.R
 import com.lagradost.cloudstream3.app
 import com.lagradost.cloudstream3.databinding.FragmentActorFilmographyBinding
@@ -35,6 +39,10 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     private val filmographyList = mutableListOf<FilmographyItem>()
     private val seenIds = mutableSetOf<Int>()
 
+    private var popularItems = listOf<FilmographyItem>()
+    private var latestItems = listOf<FilmographyItem>()
+    private var upcomingItems = listOf<FilmographyItem>()
+
     private val popularAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
     private val latestAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
     private val upcomingAdapter = ActorFilmographyAdapter { item -> onFilmographyItemClick(item) }
@@ -43,6 +51,7 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
 
     companion object {
         private const val TMDB_API_KEY = "e6333b32409e02a4a6eba6fb7ff866bb"
+        private val filmographyCache = mutableMapOf<Int, List<FilmographyItem>>()
     }
 
     override fun fixLayout(view: View) {
@@ -88,6 +97,15 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
+        binding.popularTitle.setOnClickListener {
+            if (popularItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_popular), popularItems)
+        }
+        binding.latestTitle.setOnClickListener {
+            if (latestItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_latest), latestItems)
+        }
+        binding.upcomingTitle.setOnClickListener {
+            if (upcomingItems.isNotEmpty()) showSectionBottomSheet(getString(R.string.actor_upcoming), upcomingItems)
+        }
     }
 
     private fun setupRecyclerViews(binding: FragmentActorFilmographyBinding) {
@@ -108,6 +126,14 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
     }
 
     private fun loadFilmography(binding: FragmentActorFilmographyBinding) {
+        val cached = filmographyCache[actorId]
+        if (cached != null) {
+            filmographyList.clear()
+            filmographyList.addAll(cached)
+            bindFilmography(binding)
+            return
+        }
+
         binding.loadingIndicator.visibility = View.GONE
         binding.shimmerLayout.visibility = View.VISIBLE
         binding.shimmerLayout.startShimmer()
@@ -118,6 +144,7 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
                 val creditsJson = fetchCombinedCredits(language)
 
                 processCredits(creditsJson)
+                filmographyCache[actorId] = filmographyList.toList()
 
                 main { bindFilmography(binding) }
             } catch (e: Exception) {
@@ -187,39 +214,61 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
 
         val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 
-        val popular = filmographyList
-            .filterNot { it.releaseDate.orEmpty() > todayStr }
+        popularItems = filmographyList
             .sortedByDescending { it.popularity }
             .take(30)
 
-        val latest = filmographyList
+        latestItems = filmographyList
             .filter { !it.releaseDate.orEmpty().isNullOrEmpty() && it.releaseDate.orEmpty() <= todayStr }
             .sortedByDescending { it.releaseDate.orEmpty() }
             .take(30)
 
-        val upcoming = filmographyList
+        upcomingItems = filmographyList
             .filter { !it.releaseDate.orEmpty().isNullOrEmpty() && it.releaseDate.orEmpty() > todayStr }
             .sortedBy { it.releaseDate.orEmpty() }
 
-        if (popular.isNotEmpty()) {
-            popularAdapter.submitList(popular)
+        if (popularItems.isNotEmpty()) {
+            popularAdapter.submitList(popularItems)
             binding.popularSection.visibility = View.VISIBLE
         }
-        if (latest.isNotEmpty()) {
-            latestAdapter.submitList(latest)
+        if (latestItems.isNotEmpty()) {
+            latestAdapter.submitList(latestItems)
             binding.latestSection.visibility = View.VISIBLE
         }
-        if (upcoming.isNotEmpty()) {
-            upcomingAdapter.submitList(upcoming)
+        if (upcomingItems.isNotEmpty()) {
+            upcomingAdapter.submitList(upcomingItems)
             binding.upcomingSection.visibility = View.VISIBLE
         }
-        if (popular.isEmpty() && latest.isEmpty() && upcoming.isEmpty()) {
+        if (popularItems.isEmpty() && latestItems.isEmpty() && upcomingItems.isEmpty()) {
             binding.emptyState.visibility = View.VISIBLE
         }
     }
 
     private fun onFilmographyItemClick(item: FilmographyItem) {
         QuickSearchFragment.pushSearch(requireActivity(), item.title)
+    }
+
+    private fun showSectionBottomSheet(title: String, items: List<FilmographyItem>) {
+        val dialog = BottomSheetDialog(requireContext())
+        val recyclerView = RecyclerView(requireContext()).apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            adapter = ActorFilmographyAdapter { item ->
+                onFilmographyItemClick(item)
+                dialog.dismiss()
+            }.also { it.submitList(items) }
+            val padding = resources.getDimensionPixelSize(R.dimen.result_padding)
+            setPadding(padding, padding, padding, padding)
+        }
+        dialog.setContentView(recyclerView)
+        dialog.setOnShowListener {
+            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet?.let {
+                val params = it.layoutParams
+                params.height = ViewGroup.LayoutParams.MATCH_PARENT
+                it.layoutParams = params
+            }
+        }
+        dialog.show()
     }
 
     private fun showError(binding: FragmentActorFilmographyBinding) {

@@ -86,6 +86,17 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
     }
 
     private fun loadActorDetails(binding: FragmentActorPopupBinding) {
+        val cached = popupCache[actorId]
+        if (cached != null) {
+            val lang = getWikidataLanguageCode()
+            if (cached.first != null) {
+                main { bindWikidataDetails(binding, cached.first!!, cached.first!!.getJSONObject("entities").keys().asSequence().firstOrNull() ?: "", lang, cached.second) }
+            } else if (cached.third != null) {
+                main { bindTmdbDetails(binding, cached.third!!) }
+            }
+            return
+        }
+
         ioSafe {
             try {
                 val externalResponse = app.get(
@@ -111,6 +122,7 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
 
                     if (wikidataJson.optInt("success", 0) == 1) {
                         val resolvedLabels = resolvePlaceAndCitizenship(wikidataJson, wikidataId, lang)
+                        popupCache[actorId] = Triple(wikidataJson, resolvedLabels, null)
                         main { bindWikidataDetails(binding, wikidataJson, wikidataId, lang, resolvedLabels) }
                         return@ioSafe
                     }
@@ -125,6 +137,7 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
                     )
                 )
                 val json = JSONObject(response.text)
+                popupCache[actorId] = Triple(null, emptyMap(), json)
                 main { bindTmdbDetails(binding, json) }
             } catch (e: Exception) {
                 logError(e)
@@ -457,6 +470,7 @@ class ActorPopupDialog : BaseDialogFragment<FragmentActorPopupBinding>(
 
     companion object {
         private const val TMDB_API_KEY = "e6333b32409e02a4a6eba6fb7ff866bb"
+        private val popupCache = mutableMapOf<Int, Triple<JSONObject?, Map<String, String>, JSONObject?>>()
 
         fun newInstance(actorId: Int, actorName: String, actorImage: String?): ActorPopupDialog {
             val fragment = ActorPopupDialog()
