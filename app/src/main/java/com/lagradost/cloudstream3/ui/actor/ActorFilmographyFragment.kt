@@ -2,6 +2,8 @@ package com.lagradost.cloudstream3.ui.actor
 
 import android.app.AlertDialog
 import android.graphics.Color
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
@@ -100,7 +102,14 @@ class ActorFilmographyFragment : BaseFragment<FragmentActorFilmographyBinding>(
         binding.actorName.text = actorName
         if (!actorImageUrl.isNullOrEmpty()) {
             binding.heroBackground.loadImage(actorImageUrl) {
-                BlurTransformation(25)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    listener(onSuccess = { _, _ ->
+                        try {
+                            val blurEffect = RenderEffect.createBlurEffect(25f, 25f, Shader.TileMode.CLAMP)
+                            binding.heroBackground.setRenderEffect(blurEffect)
+                        } catch (_: Exception) {}
+                    })
+                }
             }
             binding.actorProfileImage.loadImage(actorImageUrl)
         }
