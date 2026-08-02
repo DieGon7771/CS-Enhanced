@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/primaryBlackBackground">
+
+    <LinearLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/actor_image"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/roundedImageView"
+                        android:src="@drawable/ic_baseline_person_24"
+                        android:importantForAccessibility="no" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/actor_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/google_sans"
+                            android:maxLines="2"
+                            android:ellipsize="end" />
+
+                        <TextView
+                            android:id="@+id/actor_department"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:layout_marginTop="4dp"
+                            android:textColor="?attr/grayTextColor"
+                            android:fontFamily="@font/google_sans" />
+
+                        <LinearLayout
+                            android:id="@+id/row_birthday"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="6dp"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_birth"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_birthday"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/row_death"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:visibility="gone"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_death"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_deathday"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/row_age"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_age"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_age"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/row_gender"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_gender"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_gender"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/row_birthplace"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_birthplace"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_birthplace"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/row_citizenship"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_citizenship"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_citizenship"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/row_height"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_height"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_height"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/row_weight"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone"
+                            android:baselineAligned="false">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/actor_weight"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+
+                            <TextView
+                                android:id="@+id/actor_weight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"
+                                android:layout_marginStart="4dp"
+                                android:textColor="?attr/textColor"
+                                android:fontFamily="@font/google_sans" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/filmography_button"
+            style="@style/BlackButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/actor_filmography"
+            android:fontFamily="@font/google_sans"
+            app:icon="@drawable/ic_baseline_film_roll_24"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconSize="24dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/search_web_button"
+            style="@style/BlackButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/actor_search_web"
+            android:fontFamily="@font/google_sans"
+            app:icon="@drawable/ic_baseline_language_24"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconSize="24dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/loading_indicator"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:visibility="visible" />
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        app:shimmer_auto_start="true"
+        app:shimmer_base_alpha="0.2"
+        app:shimmer_duration="@integer/loading_time"
+        app:shimmer_highlight_alpha="0.3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:background="@color/grayShimmer"
+                    app:cardCornerRadius="50dp"
+                    app:cardElevation="0dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <include layout="@layout/loading_line" />
+                    <include layout="@layout/loading_line_short" />
+                    <include layout="@layout/loading_line_short" />
+                    <include layout="@layout/loading_line_short" />
+                    <include layout="@layout/loading_line_short" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp" />
+
+            <include layout="@layout/loading_line" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="8dp" />
+            <include layout="@layout/loading_line" />
+        </LinearLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+</FrameLayout>

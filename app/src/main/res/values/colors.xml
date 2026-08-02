@@ -122,4 +122,13 @@
     <color name="colorTestFail">#ea596e</color>
     <color name="colorTestWarning">#FF9800</color>
     <color name="playIconBackground">#B3000000</color>
+    <!-- Filter Button Colors -->
+    <color name="filter_button_text">#FFFFFF</color>
+    <color name="filter_button_selected">#FF0000</color> <!-- Replace with your primary color -->
+    <color name="filter_button_unselected">#1AFFFFFF</color>
+
+<!-- Sort Button Colors -->
+    <color name="sort_button_text">#FFFFFF</color>
+    <color name="sort_button_selected">#33FFFFFF</color>
+    <color name="sort_button_unselected">#00000000</color>
 </resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="2dp"
+    android:focusable="false"
+    android:clickable="false">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/posterCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="?attr/primaryGrayBackground">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/posterImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+
+            <FrameLayout
+                android:id="@+id/posterPlaceholder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/iconGrayBackground"
+                android:visibility="visible"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_baseline_person_24"
+                    android:tint="?attr/grayTextColor" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/yearBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="4dp"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/rating_badge_background"
+                android:visibility="gone" />
+
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:paddingHorizontal="4dp"
+        android:textSize="12sp"
+        android:textColor="?attr/textColor"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:lineSpacingExtra="1dp" />
+
+    <TextView
+        android:id="@+id/yearText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="4dp"
+        android:textSize="11sp"
+        android:textColor="?attr/grayTextColor"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center_horizontal" />
+
+</LinearLayout>

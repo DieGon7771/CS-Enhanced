@@ -1129,4 +1129,35 @@
     <item name="cornerFamily">rounded</item>
     <item name="cornerSize">50%</item>
 </style>
+    <!-- Filter Button Style -->
+<style name="FilterButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">36dp</item>
+    <item name="android:paddingHorizontal">16dp</item>
+    <item name="android:textSize">13sp</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/filter_button_text</item>
+    <item name="android:background">@drawable/filter_button_background</item>
+    <item name="android:stateListAnimator">@null</item>
+    <item name="android:insetTop">0dp</item>
+    <item name="android:insetBottom">0dp</item>
+    <item name="android:fontFamily">@font/google_sans</item>
+</style>
+
+<!-- Sort Button Style -->
+<style name="SortButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">32dp</item>
+    <item name="android:paddingHorizontal">12dp</item>
+    <item name="android:textSize">12sp</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">@color/sort_button_text</item>
+    <item name="android:background">@drawable/sort_button_background</item>
+    <item name="android:stateListAnimator">@null</item>
+    <item name="android:insetTop">0dp</item>
+    <item name="android:insetBottom">0dp</item>
+    <item name="android:fontFamily">@font/google_sans</item>
+    <item name="drawableTint">@color/sort_button_text</item>
+    <item name="drawableSize">16dp</item>
+</style>
 </resources>
